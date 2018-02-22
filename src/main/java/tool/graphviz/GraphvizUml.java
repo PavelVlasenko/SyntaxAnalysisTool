@@ -41,8 +41,8 @@ public class GraphvizUml {
                 init.link(mkString));
 
         try {
-            Graphviz.fromGraph(g).width(900).render(Format.XDOT)
-            .toFile(new File("C:/Users/SBT-Vlasenko-PV/Test/ex2.dot"));
+            Graphviz.fromGraph(g).width(900).render(Format.PNG)
+            .toFile(new File("C:/Users/SBT-Vlasenko-PV/Test/1.png"));
         } catch (IOException e) {
             e.printStackTrace();
         }

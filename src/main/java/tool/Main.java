@@ -1,7 +1,7 @@
 package tool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tool.core.AstGenerator;
+import tool.ast.AstGenerator;
 import tool.graphviz.GraphvizUml;
 
 public class Main {
@@ -11,7 +11,7 @@ public class Main {
     public static void main(String ... args) {
         LOGGER.info("Start program.");
 //        AstGenerator astGenerator = new AstGenerator();
-//        astGenerator.generateAst();
+//        astGenerator.generateCAst();
 
         GraphvizUml graphvizUml = new GraphvizUml();
         graphvizUml.createUml();
