@@ -10,10 +10,7 @@ public class Main {
 
     public static void main(String ... args) {
         LOGGER.info("Start program.");
-//        AstGenerator astGenerator = new AstGenerator();
-//        astGenerator.generateCAst();
-
-        GraphvizUml graphvizUml = new GraphvizUml();
-        graphvizUml.createUml();
+        AstGenerator astGenerator = new AstGenerator();
+        astGenerator.generateCAst();
     }
 }

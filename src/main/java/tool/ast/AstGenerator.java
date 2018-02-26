@@ -31,33 +31,12 @@ public class AstGenerator {
         ParserRuleContext tree = parser.stmt();
     }
 
-    public void generatePythonAst() {
-        LOGGER.info("Generate Python AST.");
-        CharStream input = null;
-        try {
-            ClassLoader classLoader = getClass().getClassLoader();
-            Path path = Paths.get(classLoader.getResource("examples/python_example.py").toURI());
-
-
-            input = CharStreams.fromPath(path);
-        } catch (Exception e) {
-            LOGGER.error("Error while parsing file.");
-        }
-        Python3sLexer lexer = new Python3sLexer(input);
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        Python3sParser parser = new Python3sParser(tokens);
-
-        ParserRuleContext tree = parser.
-    }
-
     public void generateCAst() {
         LOGGER.info("Generate C AST.");
         CharStream input = null;
         try {
             ClassLoader classLoader = getClass().getClassLoader();
             Path path = Paths.get(classLoader.getResource("examples/c_example.c").toURI());
-
-
             input = CharStreams.fromPath(path);
         } catch (Exception e) {
             LOGGER.error("Error while parsing file.");
