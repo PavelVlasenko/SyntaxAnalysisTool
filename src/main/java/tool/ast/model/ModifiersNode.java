@@ -1,7 +1,5 @@
 package tool.ast.model;
 
-import nodes.TreeNode;
-
 public abstract class ModifiersNode extends TreeNode {
     protected boolean isStatic = false;
     protected String visibility = "package-private";
