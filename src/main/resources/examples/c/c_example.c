@@ -1,14 +1,26 @@
-main()
+int main()
 {
-    /* Define default values: */
-
     int n = 0;
-    float x = 0.0;
+    if( a < 20 ) {
+          printf("a is less than 20\n" );
+       }
 
-    /* Define contents of dialog window */
+    switch(expression) {
 
-    create_int_dialog_entry("n", &n);
-    create_float_dialog_entry("x", &x);
+       case constant-expression  :
+          statement(s);
+          break; /* optional */
+       default : /* Optional */
+       statement(s);
+    }
+
+    while(condition) {
+       statement(s);
+    }
+
+    for ( init; condition; increment ) {
+       statement(s);
+    }
 
     /* Create window with name "Setup" and top-left corner at (0,0) */
 
@@ -21,4 +33,11 @@ main()
     /* Print out the new values */
 
     printf("n = %d, x = %f\n", n, x);
+}
+
+statement(int s)
+{
+    printf("s");
+}
+}
 }

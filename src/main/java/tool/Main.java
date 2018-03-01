@@ -10,7 +10,5 @@ public class Main {
 
     public static void main(String ... args) {
         LOGGER.info("Start program.");
-        AstGenerator astGenerator = new AstGenerator();
-        astGenerator.generatePythonAst();
     }
 }
