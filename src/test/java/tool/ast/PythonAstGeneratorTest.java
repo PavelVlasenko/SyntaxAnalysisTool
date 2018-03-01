@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import tool.ast.model.TreeNode;
 import tool.formats.FormatFactory;
 import tool.formats.xml.XMLFactory;
+import tool.utils.FileManager;
 
 public class PythonAstGeneratorTest {
 
@@ -15,5 +16,7 @@ public class PythonAstGeneratorTest {
         FormatFactory formatFactory = new XMLFactory();
         String xmlAst = formatFactory.format(ast);
         System.out.println(xmlAst);
+
+        FileManager.saveFile("output/python_example.xml", xmlAst);
     }
 }

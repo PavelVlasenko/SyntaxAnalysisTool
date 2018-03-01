@@ -47,12 +47,6 @@ public class CAstVisitor extends CBaseListener {
     }
 
     @Override
-    public void enterConditionalExpression(CParser.ConditionalExpressionContext ctx) {
-        validate();
-        ((MethodNode)currentNode).incrNbIf();
-    }
-
-    @Override
     public void enterJumpStatement(CParser.JumpStatementContext ctx) {
         validate();
         ((MethodNode)currentNode).incrNbBreak();
@@ -79,6 +73,12 @@ public class CAstVisitor extends CBaseListener {
     @Override
     public void enterEveryRule(ParserRuleContext ctx) {
         super.enterEveryRule(ctx);
+    }
+
+    @Override
+    public void enterSelectionStatement(CParser.SelectionStatementContext ctx) {
+        validate();
+        ((MethodNode)currentNode).incrNbIf();
     }
 
     private void validate() {
