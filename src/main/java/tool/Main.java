@@ -1,8 +1,6 @@
 package tool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tool.ast.AstGenerator;
-import tool.graphviz.GraphvizUml;
 
 public class Main {
 
