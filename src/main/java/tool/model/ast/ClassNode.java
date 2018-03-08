@@ -1,4 +1,4 @@
-package tool.ast.model;
+package tool.model.ast;
 
 public class ClassNode extends InterfaceNode {
 

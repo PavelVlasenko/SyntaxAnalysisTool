@@ -1,6 +1,6 @@
 package tool.formats.xml;
 
-import tool.ast.model.MyNode;
+import tool.model.MyNode;
 import tool.formats.AbstractFormat;
 import tool.formats.FormatFactory;
 

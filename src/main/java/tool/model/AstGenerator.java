@@ -1,4 +1,4 @@
-package tool.ast;
+package tool.model;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -6,8 +6,7 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tool.antlr4.*;
-import tool.ast.model.RootNode;
-import tool.ast.model.TreeNode;
+import tool.model.ast.RootNode;
 import tool.visitors.CAstVisitor;
 import tool.visitors.PythonAstVisitor;
 

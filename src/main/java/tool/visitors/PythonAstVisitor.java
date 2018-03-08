@@ -2,7 +2,10 @@ package tool.visitors;
 
 import tool.antlr4.Python3BaseListener;
 import tool.antlr4.Python3Parser;
-import tool.ast.model.*;
+import tool.model.ast.ClassNode;
+import tool.model.ast.ConstructorNode;
+import tool.model.ast.MethodNode;
+import tool.model.TreeNode;
 
 public class PythonAstVisitor extends Python3BaseListener {
 

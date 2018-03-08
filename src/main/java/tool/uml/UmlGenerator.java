@@ -7,8 +7,8 @@ import guru.nidi.graphviz.model.Graph;
 import guru.nidi.graphviz.model.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tool.ast.model.ClassNode;
-import tool.ast.model.TreeNode;
+import tool.model.ast.ClassNode;
+import tool.model.TreeNode;
 
 import java.io.File;
 import java.io.IOException;

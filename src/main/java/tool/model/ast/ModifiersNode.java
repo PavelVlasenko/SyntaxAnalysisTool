@@ -1,4 +1,6 @@
-package tool.ast.model;
+package tool.model.ast;
+
+import tool.model.TreeNode;
 
 public abstract class ModifiersNode extends TreeNode {
     protected boolean isStatic = false;

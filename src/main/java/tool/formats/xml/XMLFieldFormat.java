@@ -1,6 +1,6 @@
 package tool.formats.xml;
 
-import tool.ast.model.FieldNode;
+import tool.model.ast.FieldNode;
 import tool.formats.AbstractFormat;
 
 public class XMLFieldFormat extends AbstractFormat {

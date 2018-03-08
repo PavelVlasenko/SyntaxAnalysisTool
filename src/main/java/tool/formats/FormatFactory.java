@@ -1,7 +1,7 @@
 package tool.formats;
 
-import tool.ast.model.MyNode;
-import tool.ast.model.TreeNode;
+import tool.model.MyNode;
+import tool.model.TreeNode;
 
 public abstract class FormatFactory {
 

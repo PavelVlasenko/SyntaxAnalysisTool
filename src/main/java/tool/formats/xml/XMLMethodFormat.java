@@ -1,6 +1,6 @@
 package tool.formats.xml;
 
-import tool.ast.model.MethodNode;
+import tool.model.ast.MethodNode;
 import tool.formats.AbstractFormat;
 
 public class XMLMethodFormat extends AbstractFormat {

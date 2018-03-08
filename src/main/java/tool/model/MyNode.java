@@ -1,4 +1,4 @@
-package tool.ast.model;
+package tool.model;
 
 public abstract class MyNode {
     protected int id;

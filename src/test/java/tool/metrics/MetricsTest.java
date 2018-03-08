@@ -1,8 +1,8 @@
 package tool.metrics;
 
 import org.junit.jupiter.api.Test;
-import tool.ast.AstGenerator;
-import tool.ast.model.TreeNode;
+import tool.model.AstGenerator;
+import tool.model.TreeNode;
 import tool.utils.FileManager;
 
 import java.util.Collections;

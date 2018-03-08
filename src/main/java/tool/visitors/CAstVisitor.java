@@ -3,8 +3,8 @@ package tool.visitors;
 import org.antlr.v4.runtime.ParserRuleContext;
 import tool.antlr4.CBaseListener;
 import tool.antlr4.CParser;
-import tool.ast.model.MethodNode;
-import tool.ast.model.TreeNode;
+import tool.model.ast.MethodNode;
+import tool.model.TreeNode;
 
 public class CAstVisitor extends CBaseListener {
 

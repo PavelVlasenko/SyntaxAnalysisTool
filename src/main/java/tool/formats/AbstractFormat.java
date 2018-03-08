@@ -1,6 +1,6 @@
 package tool.formats;
 
-import tool.ast.model.MyNode;
+import tool.model.MyNode;
 
 public abstract class AbstractFormat {
     protected MyNode node;

@@ -1,4 +1,4 @@
-package tool.ast.model;
+package tool.model.ast;
 
 public class FieldNode extends ClassNode {
     protected String type;

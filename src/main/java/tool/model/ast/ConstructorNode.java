@@ -1,4 +1,4 @@
-package tool.ast.model;
+package tool.model.ast;
 
 public class ConstructorNode extends MethodNode {
     public ConstructorNode(String name) {

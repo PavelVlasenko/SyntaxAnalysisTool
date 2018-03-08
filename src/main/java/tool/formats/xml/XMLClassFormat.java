@@ -1,6 +1,6 @@
 package tool.formats.xml;
 
-import tool.ast.model.ClassNode;
+import tool.model.ast.ClassNode;
 import tool.formats.AbstractFormat;
 
 public class XMLClassFormat extends AbstractFormat {

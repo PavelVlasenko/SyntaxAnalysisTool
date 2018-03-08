@@ -1,4 +1,6 @@
-package tool.ast.model;
+package tool.model.ast;
+
+import tool.model.TreeNode;
 
 public class ParameterNode extends TreeNode {
     protected String type;

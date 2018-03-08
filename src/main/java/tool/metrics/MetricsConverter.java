@@ -1,7 +1,7 @@
 package tool.metrics;
 
-import tool.ast.model.MethodNode;
-import tool.ast.model.TreeNode;
+import tool.model.ast.MethodNode;
+import tool.model.TreeNode;
 
 import java.util.List;
 
