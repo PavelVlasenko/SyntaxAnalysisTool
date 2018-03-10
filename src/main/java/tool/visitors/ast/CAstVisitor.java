@@ -1,4 +1,4 @@
-package tool.visitors;
+package tool.visitors.ast;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import tool.antlr4.CBaseListener;

@@ -1,4 +1,4 @@
-package tool.visitors;
+package tool.visitors.ast;
 
 import tool.antlr4.Python3BaseListener;
 import tool.antlr4.Python3Parser;

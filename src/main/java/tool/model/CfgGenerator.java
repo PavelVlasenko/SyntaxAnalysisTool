@@ -1,23 +1,25 @@
 package tool.model;
 
-import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tool.antlr4.*;
+import tool.antlr4.Python3Lexer;
+import tool.antlr4.Python3Parser;
 import tool.model.ast.RootNode;
-import tool.visitors.ast.CAstVisitor;
 import tool.visitors.ast.PythonAstVisitor;
+import tool.visitors.cfg.CfgVisitor;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class AstGenerator {
+public class CfgGenerator {
+    public static final Logger LOGGER = LoggerFactory.getLogger(CfgGenerator.class);
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AstGenerator.class);
-
-    public TreeNode generatePythonAst(String fileName) {
+    public void generateCfg(String fileName) {
         LOGGER.info("Generate Python AST.");
         Python3Lexer lexer = new Python3Lexer(getStream(fileName));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -25,31 +27,10 @@ public class AstGenerator {
 
         ParseTree tree = parser.file_input();
 
-        TreeNode ast = new RootNode("AST");
-        ast.setFilePath(fileName);
-        PythonAstVisitor visitor = new PythonAstVisitor(ast);
+        CfgVisitor visitor = new CfgVisitor();
 
         ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
         parseTreeWalker.walk(visitor, tree);
-        return ast;
-    }
-
-    public TreeNode generateCAst(String fileName) {
-        LOGGER.info("Generate C AST.");
-        CLexer lexer = new CLexer(getStream(fileName));
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        CParser parser = new CParser(tokens);
-
-        ParseTree tree = parser.compilationUnit();
-
-        TreeNode ast = new RootNode("AST");
-        ast.setFilePath(fileName);
-        CAstVisitor visitor = new CAstVisitor(ast);
-
-        ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
-        parseTreeWalker.walk(visitor, tree);
-
-        return ast;
     }
 
     private CharStream getStream(String fileName) {
@@ -63,4 +44,5 @@ public class AstGenerator {
         }
         return input;
     }
+
 }
