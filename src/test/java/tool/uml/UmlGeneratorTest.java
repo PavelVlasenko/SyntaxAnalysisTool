@@ -17,6 +17,6 @@ public class UmlGeneratorTest {
 
         UmlGenerator umlGenerator = new UmlGenerator();
         Graph graph = umlGenerator.createUml(Collections.singletonList(ast));
-        umlGenerator.exportUml(graph, "uml_diagram.png", Format.PNG);
+        umlGenerator.exportUml(graph, "C:\\Users\\SBT-Vlasenko-PV\\Test\\uml_diagram.png", Format.PNG);
     }
 }

@@ -19,9 +19,10 @@ import static guru.nidi.graphviz.attribute.Records.rec;
 import static guru.nidi.graphviz.attribute.Records.turn;
 import static guru.nidi.graphviz.model.Factory.graph;
 import static guru.nidi.graphviz.model.Factory.node;
+import static guru.nidi.graphviz.model.Link.to;
 
 /**
- *
+ *  Generates UML
  */
 public class UmlGenerator {
     private static final Logger LOGGER = LoggerFactory.getLogger(UmlGenerator.class);

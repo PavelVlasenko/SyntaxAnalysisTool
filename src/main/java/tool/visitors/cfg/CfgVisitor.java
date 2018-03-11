@@ -34,7 +34,7 @@ public class CfgVisitor extends Python3BaseListener {
     }
 
     private void initNewCFG() {
-        entryNode = new EntryNode(getId());
+        entryNode = new EntryNode("Entry node");
         exitNode = new ExitNode(entryNode.getName());
 
         exitNode.noOtherSuccessor(true);
@@ -79,8 +79,8 @@ public class CfgVisitor extends Python3BaseListener {
 
     @Override
     public void enterIf_stmt(Python3Parser.If_stmtContext ctx) {
-        IfBeginNode ifBeginNode = new IfBeginNode("");
-        ConditionNode condNode = new ConditionNode("");//TODO
+        IfBeginNode ifBeginNode = new IfBeginNode("If begin");
+        ConditionNode condNode = new ConditionNode("Condition");//TODO
         IfEndNode ifEndNode = new IfEndNode("");
 
         ifBeginNode.setLineNumber(1); //TODO
@@ -97,16 +97,19 @@ public class CfgVisitor extends Python3BaseListener {
 
         conditions.push(condNode);
         ifends.push(ifEndNode);
+
+        Python3Parser.SuiteContext suiteContext = ctx.getChild(Python3Parser.SuiteContext.class, 1);
+//        if(suiteContext != null) {
+//            enterElseStatement(suiteContext);
+//        }
     }
 
-//    public Object visit(ElseStatement node, Object data) {
+//    public void enterElseStatement(Python3Parser.SuiteContext ctx) {
 //        GraphNode condNode = conditions.getFirst();
 //        GraphNode ifEndNode = ifends.getFirst();
 //
 //        GraphNode trueCaseSubGraph = condNode.getSuccessors().get(0);
 //        condNode.removeSuccessor(0);
-//
-//        propagate(node, data);
 //
 //        if(condNode.getSuccessors().isEmpty()) {
 //            condNode.addSuccessor(ifEndNode);
@@ -117,9 +120,15 @@ public class CfgVisitor extends Python3BaseListener {
 //
 //        conditions.pop();
 //        ifends.pop();
-//
-//        return data;
 //    }
+
+
+    @Override
+    public void enterSuite(Python3Parser.SuiteContext ctx) {
+        super.enterSuite(ctx);
+    }
+
+
 
     @Override
     public void exitIf_stmt(Python3Parser.If_stmtContext ctx) {
@@ -317,7 +326,7 @@ public class CfgVisitor extends Python3BaseListener {
 
     @Override
     public void enterReturn_stmt(Python3Parser.Return_stmtContext ctx) {
-        ReturnStmtNode returnNode = new ReturnStmtNode("");
+        ReturnStmtNode returnNode = new ReturnStmtNode("Return");
         returnNode.setLineNumber(1);//TODO
         returnNode.setFilePath(""); //TODO
         entryNode.addNodeToLeaves(returnNode);
@@ -353,8 +362,13 @@ public class CfgVisitor extends Python3BaseListener {
 //    }
 
 
+//    @Override
+//    public void enterSimple_stmt(Python3Parser.Simple_stmtContext ctx) {
+//        super.enterSimple_stmt(ctx);
+//    }
+
     @Override
-    public void enterStmt(Python3Parser.StmtContext ctx) {
+    public void enterExpr_stmt(Python3Parser.Expr_stmtContext ctx) {
         String name = ctx.getText();
 //        if(name.equals("++") || name.equals("--")) {
 //            name = node.jjtGetFirstToken().next.toString();
@@ -386,6 +400,49 @@ public class CfgVisitor extends Python3BaseListener {
 
             entryNode.addNodeToLeaves(varAssignNode);
         }
+    }
+
+//    @Override
+//    public void enterSmall_stmt(Python3Parser.Small_stmtContext ctx) {
+//        super.enterSmall_stmt(ctx);
+//    }
+
+
+
+    @Override
+    public void enterStmt(Python3Parser.StmtContext ctx) {
+        /*
+        String name = ctx.getText();
+//        if(name.equals("++") || name.equals("--")) {
+//            name = node.jjtGetFirstToken().next.toString();
+//        }
+
+//        String line = readLine(node.jjtGetFirstToken().beginLine);
+        String line = ctx.getText();
+
+        if(line.matches("\\s*\\w*\\s*\\(.*")) {
+            MethodCallNode methodCallNode = new MethodCallNode(line);
+            methodCallNode.setLineNumber(1); //TODO
+            methodCallNode.setFilePath(""); //TODO
+           //HashSet<String> usedVars = this.getUsedVar((SimpleNode) node.jjtGetChild(0));
+           // usedVars.remove(name);
+          //  methodCallNode.setUsedVars(usedVars);
+
+            entryNode.addNodeToLeaves(methodCallNode);
+        } else {
+            VarAssignNode varAssignNode = new VarAssignNode(line);
+            varAssignNode.setVarName(name);
+            varAssignNode.setLineNumber(1); //TODO
+            varAssignNode.setFilePath(""); //TODO
+
+//            HashSet<String> usedVars = this.getUsedVar((SimpleNode) node.jjtGetChild(0));
+//            if(!line.matches(".*=.*"+name+".*")) {
+//                usedVars.remove(name);
+//            }
+//            varAssignNode.setUsedVars(usedVars);
+
+            entryNode.addNodeToLeaves(varAssignNode);
+        }*/
     }
 
 //    private String readLine(int lineNumber) {

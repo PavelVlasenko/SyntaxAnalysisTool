@@ -10,16 +10,19 @@ import org.slf4j.LoggerFactory;
 import tool.antlr4.Python3Lexer;
 import tool.antlr4.Python3Parser;
 import tool.model.ast.RootNode;
+import tool.model.cfg.EntryNode;
 import tool.visitors.ast.PythonAstVisitor;
 import tool.visitors.cfg.CfgVisitor;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class CfgGenerator {
     public static final Logger LOGGER = LoggerFactory.getLogger(CfgGenerator.class);
 
-    public void generateCfg(String fileName) {
+    public HashMap<String, ArrayList<EntryNode>> generateCfg(String fileName) {
         LOGGER.info("Generate Python AST.");
         Python3Lexer lexer = new Python3Lexer(getStream(fileName));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -31,6 +34,8 @@ public class CfgGenerator {
 
         ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
         parseTreeWalker.walk(visitor, tree);
+
+        return visitor.getCFGs();
     }
 
     private CharStream getStream(String fileName) {
