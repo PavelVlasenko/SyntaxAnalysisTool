@@ -1,8 +1,5 @@
-package tool.cfg_graph;
+package tool.formats.cfg;
 
-import guru.nidi.graphviz.attribute.Attributes;
-import guru.nidi.graphviz.attribute.Records;
-import guru.nidi.graphviz.attribute.Shape;
 import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.engine.Graphviz;
 import guru.nidi.graphviz.model.Graph;
@@ -10,11 +7,7 @@ import guru.nidi.graphviz.model.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tool.model.GraphNode;
-import tool.model.TreeNode;
-import tool.model.ast.ClassNode;
-import tool.model.cfg.CFGNode;
 import tool.model.cfg.EntryNode;
-import tool.uml.UmlGenerator;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,15 +20,14 @@ import static guru.nidi.graphviz.model.Factory.graph;
 import static guru.nidi.graphviz.model.Factory.node;
 
 
-public class CfgGraphBuilder {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CfgGraphBuilder.class);
+public class CfgConverter {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CfgConverter.class);
     HashMap<Integer, Node> nodes = new HashMap<>();
     List<Node> direcedNodes = new ArrayList<>();
 
 
     public List<Graph> createGraph(List<EntryNode> cfgs) {
         LOGGER.info("Start create uml");
-        List<Node> classNodes = new ArrayList<>();
         for(EntryNode cfgNode : cfgs) {
             LOGGER.info("Process  cfgNode {}", cfgNode.getFilePath());
             processCFG(cfgNode);

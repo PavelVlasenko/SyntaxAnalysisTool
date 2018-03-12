@@ -9,9 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tool.antlr4.Python3Lexer;
 import tool.antlr4.Python3Parser;
-import tool.model.ast.RootNode;
 import tool.model.cfg.EntryNode;
-import tool.visitors.ast.PythonAstVisitor;
 import tool.visitors.cfg.CfgVisitor;
 
 import java.nio.file.Path;

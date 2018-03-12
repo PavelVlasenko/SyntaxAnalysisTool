@@ -1,4 +1,4 @@
-package tool.uml;
+package tool.formats.uml;
 
 import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.model.Graph;
@@ -8,15 +8,15 @@ import tool.model.TreeNode;
 
 import java.util.Collections;
 
-public class UmlGeneratorTest {
+public class UmlConverterTest {
 
     @Test
     public void UmlGenerationTest() {
         AstGenerator astGenerator = new AstGenerator();
         TreeNode ast = astGenerator.generatePythonAst("examples/python/python_example2.py");
 
-        UmlGenerator umlGenerator = new UmlGenerator();
-        Graph graph = umlGenerator.createUml(Collections.singletonList(ast));
-        umlGenerator.exportUml(graph, "C:\\Users\\SBT-Vlasenko-PV\\Test\\uml_diagram.png", Format.PNG);
+        UmlConverter umlConverter = new UmlConverter();
+        Graph graph = umlConverter.createUml(Collections.singletonList(ast));
+        umlConverter.exportUml(graph, "C:\\Users\\SBT-Vlasenko-PV\\Test\\uml_diagram.png", Format.PNG);
     }
 }

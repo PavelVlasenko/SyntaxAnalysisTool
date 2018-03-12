@@ -1,7 +1,6 @@
 package tool.formats.xml;
 
 import tool.model.ast.ConstructorNode;
-import tool.formats.AbstractFormat;
 
 public class XMLConstructorFormat extends AbstractFormat {
     @Override

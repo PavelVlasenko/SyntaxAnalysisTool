@@ -1,8 +1,6 @@
 package tool.formats.xml;
 
 import tool.model.MyNode;
-import tool.formats.AbstractFormat;
-import tool.formats.FormatFactory;
 
 public class XMLFactory extends FormatFactory {
     @Override

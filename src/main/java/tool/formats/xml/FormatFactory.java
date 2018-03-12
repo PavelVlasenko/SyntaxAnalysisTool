@@ -1,4 +1,4 @@
-package tool.formats;
+package tool.formats.xml;
 
 import tool.model.MyNode;
 import tool.model.TreeNode;

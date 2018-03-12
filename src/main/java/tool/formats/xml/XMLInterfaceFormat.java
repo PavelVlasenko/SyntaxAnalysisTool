@@ -1,7 +1,6 @@
 package tool.formats.xml;
 
 import tool.model.ast.InterfaceNode;
-import tool.formats.AbstractFormat;
 
 public class XMLInterfaceFormat extends AbstractFormat {
     @Override

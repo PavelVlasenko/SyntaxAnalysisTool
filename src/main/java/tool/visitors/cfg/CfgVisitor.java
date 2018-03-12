@@ -1,17 +1,14 @@
 package tool.visitors.cfg;
 
-import com.kitfox.svg.animation.parser.SimpleNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tool.antlr4.Python3BaseListener;
 import tool.antlr4.Python3Parser;
 import tool.model.GraphNode;
 import tool.model.cfg.*;
-import tool.utils.FileManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 
 public class CfgVisitor extends Python3BaseListener {
@@ -33,8 +30,8 @@ public class CfgVisitor extends Python3BaseListener {
         return id;
     }
 
-    private void initNewCFG() {
-        entryNode = new EntryNode("Entry node");
+    private void initNewCFG(String methodName) {
+        entryNode = new EntryNode("Entry \r\n" + methodName);
         exitNode = new ExitNode(entryNode.getName());
 
         exitNode.noOtherSuccessor(true);
@@ -67,8 +64,10 @@ public class CfgVisitor extends Python3BaseListener {
 
     @Override
     public void enterFuncdef(Python3Parser.FuncdefContext ctx) {
-        LOGGER.info("Enter func def");
-        initNewCFG();
+        String text = ctx.getText();
+        String methodName = text.substring(0, text.indexOf("("));
+        LOGGER.info("Enter func def {}", methodName);
+        initNewCFG(methodName);
     }
 
     @Override

@@ -1,7 +1,6 @@
 package tool.formats.xml;
 
 import tool.model.ast.ParameterNode;
-import tool.formats.AbstractFormat;
 
 public class XMLParameterFormat extends AbstractFormat {
     @Override

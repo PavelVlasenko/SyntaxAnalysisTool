@@ -1,4 +1,4 @@
-package tool.metrics;
+package tool.formats.csv;
 
 import tool.model.ast.MethodNode;
 import tool.model.TreeNode;
@@ -6,9 +6,9 @@ import tool.model.TreeNode;
 import java.util.List;
 
 /**
- * Creates metrics in CSV
+ * Creates csv in CSV
  */
-public class MetricsConverter {
+public class CsvConverter {
 
     private static final String DELIMETER = ";";
     private static final String END_OF_ROW ="\r\n";

@@ -1,4 +1,4 @@
-package tool.formats;
+package tool.formats.xml;
 
 public class XmlConverter {
 //

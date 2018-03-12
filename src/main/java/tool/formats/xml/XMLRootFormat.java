@@ -1,7 +1,5 @@
 package tool.formats.xml;
 
-import tool.formats.AbstractFormat;
-
 public class XMLRootFormat extends AbstractFormat {
     @Override
     public String getString(int part) {

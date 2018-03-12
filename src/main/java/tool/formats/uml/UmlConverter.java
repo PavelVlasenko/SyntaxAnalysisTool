@@ -1,4 +1,4 @@
-package tool.uml;
+package tool.formats.uml;
 
 import guru.nidi.graphviz.attribute.*;
 import guru.nidi.graphviz.engine.Format;
@@ -24,8 +24,8 @@ import static guru.nidi.graphviz.model.Link.to;
 /**
  *  Generates UML
  */
-public class UmlGenerator {
-    private static final Logger LOGGER = LoggerFactory.getLogger(UmlGenerator.class);
+public class UmlConverter {
+    private static final Logger LOGGER = LoggerFactory.getLogger(UmlConverter.class);
     private String filePath;
 
     /**

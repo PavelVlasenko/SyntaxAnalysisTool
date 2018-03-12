@@ -3,27 +3,26 @@ package tool.model.cfg;
 import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.model.Graph;
 import org.junit.jupiter.api.Test;
-import tool.cfg_graph.CfgGraphBuilder;
-import tool.model.CfgGenerator;
+import tool.formats.cfg.CfgConverter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class CfgGeneratorTest {
+public class CfgConverterTest {
 
     @Test
     public void pythonAstGenerationTest() {
-        CfgGenerator cfgGenerator = new CfgGenerator();
+        tool.model.CfgGenerator cfgGenerator = new tool.model.CfgGenerator();
         cfgGenerator.generateCfg("examples/python/python_cfg_example.py");
     }
 
     @Test
     public void pythonCfgGraphTest() {
-        CfgGenerator cfgGenerator = new CfgGenerator();
+        tool.model.CfgGenerator cfgGenerator = new tool.model.CfgGenerator();
         HashMap<String, ArrayList<EntryNode>> cfgs = cfgGenerator.generateCfg("examples/python/python_cfg_example.py");
 
-        CfgGraphBuilder graphBuilder = new CfgGraphBuilder();
+        CfgConverter graphBuilder = new CfgConverter();
         List<EntryNode> cfgList = new ArrayList<>();
         for(ArrayList<EntryNode> list : cfgs.values()) {
             cfgList.addAll(list);
