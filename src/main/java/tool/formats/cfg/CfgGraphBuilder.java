@@ -17,14 +17,14 @@ import static guru.nidi.graphviz.model.Factory.node;
 public class CfgGraphBuilder {
     private static final Logger LOGGER = LoggerFactory.getLogger(CfgGraphBuilder.class);
     private HashMap<Integer, Node> nodes = new HashMap<>();
-    private List<Node> direcedNodes = new ArrayList<>();
+    private List<Node> directedNodes = new ArrayList<>();
 
     public Graph createGraph(EntryNode entryNode) {
         createNodes(entryNode);
         processGraph(entryNode);
 
-        Node[] directedArray = new Node[direcedNodes.size()];
-        Graph graph = graph("CfgGraph").directed().with(direcedNodes.toArray(directedArray));
+        Node[] directedArray = new Node[directedNodes.size()];
+        Graph graph = graph("CfgGraph").directed().with(directedNodes.toArray(directedArray));
         return graph;
     }
 
@@ -33,7 +33,7 @@ public class CfgGraphBuilder {
             LOGGER.info("Process node id={}, name={}", childNode.getId(), childNode.getName());
             Node from = nodes.get(node.getId());
             Node to = nodes.get(childNode.getId());
-            direcedNodes.add(from.link(to));
+            directedNodes.add(from.link(to));
             processGraph(childNode);
         }
     }

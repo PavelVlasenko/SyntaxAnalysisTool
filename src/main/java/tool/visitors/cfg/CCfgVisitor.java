@@ -8,6 +8,7 @@ import tool.antlr4.Python3Parser;
 import tool.model.GraphNode;
 import tool.model.cfg.*;
 
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -25,6 +26,7 @@ public class CCfgVisitor extends CBaseListener {
 
     private int identifierGen = 0;
     private LinkedList<ConditionNode> conditionNodes = new LinkedList<>();
+    private ArrayList<CParser.StatementContext> elseStatements = new ArrayList<>();
 
     private String getId() {
         String id = String.valueOf(identifierGen) + ".";
@@ -78,18 +80,19 @@ public class CCfgVisitor extends CBaseListener {
 
         conditions.push(condNode);
         ifends.push(ifEndNode);
+
     }
 
     @Override
     public void exitSelectionStatement(CParser.SelectionStatementContext ctx) {
-        GraphNode condNode = conditions.getFirst();
-        GraphNode ifEndNode = ifends.getFirst();
-
-        condNode.addNodeToLeaves(ifEndNode);
-        condNode.addSuccessor(ifEndNode);
-
-        conditions.pop();
-        ifends.pop();
+//        GraphNode condNode = conditions.getFirst();
+//        GraphNode ifEndNode = ifends.getFirst();
+//
+//        condNode.addNodeToLeaves(ifEndNode);
+//        condNode.addSuccessor(ifEndNode);
+//
+//        conditions.pop();
+//        ifends.pop();
     }
 
     @Override
@@ -115,6 +118,27 @@ public class CCfgVisitor extends CBaseListener {
         } else {
             VarAssignNode varAssignNode = new VarAssignNode(getId() + "Var declaration");
             entryNode.addNodeToLeaves(varAssignNode);
+        }
+    }
+
+    @Override
+    public void enterStatement(CParser.StatementContext ctx) {
+        if(elseStatements.contains(ctx)) {
+            GraphNode condNode = conditions.getFirst();
+            GraphNode ifEndNode = ifends.getFirst();
+
+            GraphNode trueCaseSubGraph = condNode.getSuccessors().get(0);
+            condNode.removeSuccessor(0);
+
+            if(condNode.getSuccessors().isEmpty()) {
+                condNode.addSuccessor(ifEndNode);
+            }
+
+            condNode.addSuccessor(0, trueCaseSubGraph);
+            condNode.addNodeToLeaves(ifEndNode);
+
+            conditions.pop();
+            ifends.pop();
         }
     }
 
@@ -155,25 +179,6 @@ public class CCfgVisitor extends CBaseListener {
     public void enterForExpression(CParser.ForExpressionContext ctx) {
         super.enterForExpression(ctx);
     }
-
-    //    public void enterElseStatement(Python3Parser.SuiteContext ctx) {
-//        GraphNode condNode = conditions.getFirst();
-//        GraphNode ifEndNode = ifends.getFirst();
-//
-//        GraphNode trueCaseSubGraph = condNode.getSuccessors().get(0);
-//        condNode.removeSuccessor(0);
-//
-//        if(condNode.getSuccessors().isEmpty()) {
-//            condNode.addSuccessor(ifEndNode);
-//        }
-//
-//        condNode.addSuccessor(0, trueCaseSubGraph);
-//        condNode.addNodeToLeaves(ifEndNode);
-//
-//        conditions.pop();
-//        ifends.pop();
-//    }
-
 
 //    public Object visit(SwitchStatement node, Object data) {
 //        SwitchBeginNode switchBeginNode = new SwitchBeginNode("");
