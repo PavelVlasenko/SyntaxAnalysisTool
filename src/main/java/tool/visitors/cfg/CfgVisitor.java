@@ -25,14 +25,15 @@ public class CfgVisitor extends Python3BaseListener {
     private int identifierGen = 0;
 
     private String getId() {
-        String id = String.valueOf(identifierGen);
+        String id = String.valueOf(identifierGen) + ".";
         identifierGen++;
         return id;
     }
 
     private void initNewCFG(String methodName) {
-        entryNode = new EntryNode("Entry \n" + methodName);
-        exitNode = new ExitNode(entryNode.getName());
+        String entryName = "Entry \n" + methodName;
+        entryNode = new EntryNode(getId() + entryName);
+        exitNode = new ExitNode(getId() + entryName);
 
         exitNode.noOtherSuccessor(true);
 
@@ -78,9 +79,9 @@ public class CfgVisitor extends Python3BaseListener {
 
     @Override
     public void enterIf_stmt(Python3Parser.If_stmtContext ctx) {
-        IfBeginNode ifBeginNode = new IfBeginNode("If begin");
-        ConditionNode condNode = new ConditionNode("Condition");//TODO
-        IfEndNode ifEndNode = new IfEndNode("");
+        IfBeginNode ifBeginNode = new IfBeginNode(getId() + "IfBegin");
+        ConditionNode condNode = new ConditionNode(getId() +"Condition");//TODO
+        IfEndNode ifEndNode = new IfEndNode(getId() + "IfEnd");
 
         ifBeginNode.setLineNumber(1); //TODO
         ifBeginNode.setFilePath(""); //TODO
@@ -325,7 +326,7 @@ public class CfgVisitor extends Python3BaseListener {
 
     @Override
     public void enterReturn_stmt(Python3Parser.Return_stmtContext ctx) {
-        ReturnStmtNode returnNode = new ReturnStmtNode("Return");
+        ReturnStmtNode returnNode = new ReturnStmtNode(getId() + "Return");
         returnNode.setLineNumber(1);//TODO
         returnNode.setFilePath(""); //TODO
         entryNode.addNodeToLeaves(returnNode);
@@ -377,7 +378,8 @@ public class CfgVisitor extends Python3BaseListener {
         String line = ctx.getText();
 
         if(line.matches("\\s*\\w*\\s*\\(.*")) {
-            MethodCallNode methodCallNode = new MethodCallNode(line);
+            //MethodCallNode methodCallNode = new MethodCallNode(line);
+            MethodCallNode methodCallNode = new MethodCallNode(getId() + "Method call");
             methodCallNode.setLineNumber(1); //TODO
             methodCallNode.setFilePath(""); //TODO
            //HashSet<String> usedVars = this.getUsedVar((SimpleNode) node.jjtGetChild(0));
@@ -386,7 +388,8 @@ public class CfgVisitor extends Python3BaseListener {
 
             entryNode.addNodeToLeaves(methodCallNode);
         } else {
-            VarAssignNode varAssignNode = new VarAssignNode(line);
+            //VarAssignNode varAssignNode = new VarAssignNode(line);
+            VarAssignNode varAssignNode = new VarAssignNode(getId() + "Var declaration");
             varAssignNode.setVarName(name);
             varAssignNode.setLineNumber(1); //TODO
             varAssignNode.setFilePath(""); //TODO

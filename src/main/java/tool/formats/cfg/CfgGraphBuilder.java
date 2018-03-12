@@ -20,7 +20,7 @@ public class CfgGraphBuilder {
     private List<Node> direcedNodes = new ArrayList<>();
 
     public Graph createGraph(EntryNode entryNode) {
-        processCFG(entryNode);
+        createNodes(entryNode);
         processGraph(entryNode);
 
         Node[] directedArray = new Node[direcedNodes.size()];
@@ -38,15 +38,15 @@ public class CfgGraphBuilder {
         }
     }
 
-    private void processCFG(EntryNode entryNode) {
+    private void createNodes(EntryNode entryNode) {
         nodes.put(entryNode.getId(), node(entryNode.getName()));
-        processNode(entryNode);
+        createNode(entryNode);
     }
 
-    private void processNode(GraphNode cfgNode) {
+    private void createNode(GraphNode cfgNode) {
         for(GraphNode graphNode : cfgNode.getSuccessors()) {
             nodes.put(graphNode.getId(), node(graphNode.getName()));
-            processNode(graphNode);
+            createNode(graphNode);
         }
     }
 }
