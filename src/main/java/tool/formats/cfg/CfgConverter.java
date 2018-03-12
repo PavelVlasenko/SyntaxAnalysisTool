@@ -3,67 +3,43 @@ package tool.formats.cfg;
 import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.engine.Graphviz;
 import guru.nidi.graphviz.model.Graph;
-import guru.nidi.graphviz.model.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tool.model.GraphNode;
 import tool.model.cfg.EntryNode;
+import tool.utils.FormatResolver;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-
-import static guru.nidi.graphviz.model.Factory.graph;
-import static guru.nidi.graphviz.model.Factory.node;
-
+import java.util.*;
 
 public class CfgConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(CfgConverter.class);
-    HashMap<Integer, Node> nodes = new HashMap<>();
-    List<Node> direcedNodes = new ArrayList<>();
 
-
-    public List<Graph> createGraph(List<EntryNode> cfgs) {
-        LOGGER.info("Start create uml");
-        for(EntryNode cfgNode : cfgs) {
-            LOGGER.info("Process  cfgNode {}", cfgNode.getFilePath());
-            processCFG(cfgNode);
-            createGraph(cfgNode);
+    public Map<String, Graph> createGraph(List<EntryNode> cfgs) {
+        LOGGER.info("Start convert cfg");
+        Map<String, Graph> result = new HashMap<>();
+        for(EntryNode entryNode : cfgs) {
+            LOGGER.info("Process  cfgNode {}", entryNode.getName());
+            CfgGraphBuilder builder = new CfgGraphBuilder();
+            Graph graph = builder.createGraph(entryNode);
+            String entryNodeName = entryNode.getName();
+            result.put(entryNode.getFilePath() + "_" +
+                    entryNodeName.substring(entryNodeName.indexOf("\n") + 1), graph);
         }
-        Node[] directedArray = new Node[direcedNodes.size()];
-        Graph g = graph("cfg").directed().with(direcedNodes.toArray(directedArray));
-        return Collections.singletonList(g);
+        return result;
     }
 
-    private void createGraph(GraphNode node) {
-        for(GraphNode childNode : node.getSuccessors()) {
-            LOGGER.info("Process node id={}, name={}", childNode.getId(), childNode.getName());
-            Node from = nodes.get(node.getId());
-            Node to = nodes.get(childNode.getId());
-            direcedNodes.add(from.link(to));
-            createGraph(childNode);
-        }
-    }
-
-    private void processCFG(EntryNode entryNode) {
-        nodes.put(entryNode.getId(), node(entryNode.getName()));
-        processNode(entryNode);
-    }
-
-    private void processNode(GraphNode cfgNode) {
-        for(GraphNode graphNode : cfgNode.getSuccessors()) {
-            nodes.put(graphNode.getId(), node(graphNode.getName()));
-            processNode(graphNode);
+    public void exportGraphs( Map<String, Graph> graphs, String pathPrefix, Format format) {
+        for(Map.Entry<String, Graph> graphEntry : graphs.entrySet()) {
+            exportGraph(graphEntry.getValue(), pathPrefix + graphEntry.getKey(), format);
         }
     }
 
     public void exportGraph(Graph graph, String filePath, Format format) {
+        LOGGER.info("Save CFG graph to {}", filePath);
         try {
             Graphviz.fromGraph(graph).width(900).render(format)
-                    .toFile(new File(filePath));
+                    .toFile(new File(filePath  + FormatResolver.resolve(format)));
         } catch (IOException e) {
             e.printStackTrace();
         }

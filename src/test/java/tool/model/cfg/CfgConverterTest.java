@@ -8,6 +8,7 @@ import tool.formats.cfg.CfgConverter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class CfgConverterTest {
 
@@ -28,7 +29,7 @@ public class CfgConverterTest {
             cfgList.addAll(list);
         }
 
-        List<Graph> graphs = graphBuilder.createGraph(cfgList);
-        graphBuilder.exportGraph(graphs.get(0), "C:\\Users\\SBT-Vlasenko-PV\\Test\\uml_diagram.png", Format.PNG);
+        Map<String, Graph> graphs = graphBuilder.createGraph(cfgList);
+        graphBuilder.exportGraphs(graphs, "C:\\Users\\SBT-Vlasenko-PV\\Test\\", Format.PNG);
     }
 }

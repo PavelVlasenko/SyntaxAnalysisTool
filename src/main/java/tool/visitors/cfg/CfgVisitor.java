@@ -31,7 +31,7 @@ public class CfgVisitor extends Python3BaseListener {
     }
 
     private void initNewCFG(String methodName) {
-        entryNode = new EntryNode("Entry \r\n" + methodName);
+        entryNode = new EntryNode("Entry \n" + methodName);
         exitNode = new ExitNode(entryNode.getName());
 
         exitNode.noOtherSuccessor(true);
