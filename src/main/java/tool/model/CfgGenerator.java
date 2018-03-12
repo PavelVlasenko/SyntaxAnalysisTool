@@ -7,10 +7,13 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tool.antlr4.CLexer;
+import tool.antlr4.CParser;
 import tool.antlr4.Python3Lexer;
 import tool.antlr4.Python3Parser;
 import tool.model.cfg.EntryNode;
-import tool.visitors.cfg.CfgVisitor;
+import tool.visitors.cfg.CCfgVisitor;
+import tool.visitors.cfg.PythonCfgVisitor;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -20,7 +23,7 @@ import java.util.HashMap;
 public class CfgGenerator {
     public static final Logger LOGGER = LoggerFactory.getLogger(CfgGenerator.class);
 
-    public HashMap<String, ArrayList<EntryNode>> generateCfg(String fileName) {
+    public HashMap<String, ArrayList<EntryNode>> generatePythonCfg(String fileName) {
         LOGGER.info("Generate Python AST.");
         Python3Lexer lexer = new Python3Lexer(getStream(fileName));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -28,7 +31,23 @@ public class CfgGenerator {
 
         ParseTree tree = parser.file_input();
 
-        CfgVisitor visitor = new CfgVisitor();
+        PythonCfgVisitor visitor = new PythonCfgVisitor();
+
+        ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
+        parseTreeWalker.walk(visitor, tree);
+
+        return visitor.getCFGs();
+    }
+
+    public HashMap<String, ArrayList<EntryNode>> generateCCfg(String fileName) {
+        LOGGER.info("Generate Python AST.");
+        CLexer lexer = new CLexer(getStream(fileName));
+        CommonTokenStream tokens = new CommonTokenStream(lexer);
+        CParser parser = new CParser(tokens);
+
+        ParseTree tree = parser.compilationUnit();
+
+        CCfgVisitor visitor = new CCfgVisitor();
 
         ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
         parseTreeWalker.walk(visitor, tree);

@@ -2,7 +2,8 @@ package tool.visitors.cfg;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tool.antlr4.Python3BaseListener;
+import tool.antlr4.CBaseListener;
+import tool.antlr4.CParser;
 import tool.antlr4.Python3Parser;
 import tool.model.GraphNode;
 import tool.model.cfg.*;
@@ -11,18 +12,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 
-public class CfgVisitor extends Python3BaseListener {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CfgVisitor.class);
+public class CCfgVisitor extends CBaseListener {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CCfgVisitor.class);
     private HashMap<String, ArrayList<EntryNode>> cfgs = new HashMap<>();
     private EntryNode entryNode;
     private ExitNode exitNode;
-    private LinkedList<GraphNode> breakables;
-    private LinkedList<GraphNode> continuables;
-    private LinkedList<GraphNode> conditions;
-    private LinkedList<GraphNode> ifends;
+    private LinkedList<GraphNode> breakables  = new LinkedList<>();
+    private LinkedList<GraphNode> continuables  = new LinkedList<>();
+    private LinkedList<GraphNode> conditions  = new LinkedList<>();
+    private LinkedList<GraphNode> ifends  = new LinkedList<>();
     private boolean switchBreaked = false;
 
     private int identifierGen = 0;
+    private LinkedList<ConditionNode> conditionNodes = new LinkedList<>();
 
     private String getId() {
         String id = String.valueOf(identifierGen) + ".";
@@ -33,20 +35,10 @@ public class CfgVisitor extends Python3BaseListener {
     private void initNewCFG(String methodName) {
         String entryName = "Entry \n" + methodName;
         entryNode = new EntryNode(getId() + entryName);
-        exitNode = new ExitNode(getId() + entryName);
-
-        exitNode.noOtherSuccessor(true);
-
-        entryNode.setExitNode(exitNode);
-        entryNode.setLineNumber(1); //TODO
         entryNode.setFilePath(""); //TODO
-        exitNode.setLineNumber(entryNode.getLineNumber());
-        exitNode.setFilePath(""); //TODO
-
-        breakables = new LinkedList<>();
-        continuables = new LinkedList<>();
-        conditions = new LinkedList<>();
-        ifends = new LinkedList<>();
+        exitNode = new ExitNode(getId() + entryName);
+        exitNode.noOtherSuccessor(true);
+        entryNode.setExitNode(exitNode);
     }
 
     private void endNewCFG() {
@@ -62,9 +54,8 @@ public class CfgVisitor extends Python3BaseListener {
         return cfgs;
     }
 
-
     @Override
-    public void enterFuncdef(Python3Parser.FuncdefContext ctx) {
+    public void enterFunctionDefinition(CParser.FunctionDefinitionContext ctx) {
         String text = ctx.getText();
         String methodName = text.substring(0, text.indexOf("("));
         LOGGER.info("Enter func def {}", methodName);
@@ -72,39 +63,100 @@ public class CfgVisitor extends Python3BaseListener {
     }
 
     @Override
-    public void exitFuncdef(Python3Parser.FuncdefContext ctx) {
+    public void exitFunctionDefinition(CParser.FunctionDefinitionContext ctx) {
         LOGGER.info("Exit func def");
         endNewCFG();
     }
 
     @Override
-    public void enterIf_stmt(Python3Parser.If_stmtContext ctx) {
+    public void enterSelectionStatement(CParser.SelectionStatementContext ctx) {
         IfBeginNode ifBeginNode = new IfBeginNode(getId() + "IfBegin");
         ConditionNode condNode = new ConditionNode(getId() +"Condition");//TODO
         IfEndNode ifEndNode = new IfEndNode(getId() + "IfEnd");
-
-        ifBeginNode.setLineNumber(1); //TODO
-        ifBeginNode.setFilePath(""); //TODO
-        condNode.setLineNumber(1); //TODO
-        condNode.setFilePath("");
-        ifEndNode.setLineNumber(1);
-        ifEndNode.setFilePath("");
-
-        //condNode.setUsedVars(this.getUsedVar((SimpleNode) node.jjtGetChild(0)));
-
         entryNode.addNodeToLeaves(ifBeginNode);
         ifBeginNode.addSuccessor(condNode);
 
         conditions.push(condNode);
         ifends.push(ifEndNode);
-
-        Python3Parser.SuiteContext suiteContext = ctx.getChild(Python3Parser.SuiteContext.class, 1);
-//        if(suiteContext != null) {
-//            enterElseStatement(suiteContext);
-//        }
     }
 
-//    public void enterElseStatement(Python3Parser.SuiteContext ctx) {
+    @Override
+    public void exitSelectionStatement(CParser.SelectionStatementContext ctx) {
+        GraphNode condNode = conditions.getFirst();
+        GraphNode ifEndNode = ifends.getFirst();
+
+        condNode.addNodeToLeaves(ifEndNode);
+        condNode.addSuccessor(ifEndNode);
+
+        conditions.pop();
+        ifends.pop();
+    }
+
+    @Override
+    public void enterAssignmentOperator(CParser.AssignmentOperatorContext ctx) {
+        super.enterAssignmentOperator(ctx);
+    }
+
+    @Override
+    public void enterExpression(CParser.ExpressionContext ctx) {
+        if(ctx.getText().matches("\\s*\\w*\\s*\\(.*")) {
+            String line = ctx.getText();
+            MethodCallNode methodCallNode = new MethodCallNode(getId() + "Method call");
+            entryNode.addNodeToLeaves(methodCallNode);
+        }
+    }
+
+    @Override
+    public void enterDeclaration(CParser.DeclarationContext ctx) {
+        String line = ctx.getText();
+        if(line.matches("\\s*\\w*\\s*\\(.*")) {
+            MethodCallNode methodCallNode = new MethodCallNode(getId() + "Method call");
+            entryNode.addNodeToLeaves(methodCallNode);
+        } else {
+            VarAssignNode varAssignNode = new VarAssignNode(getId() + "Var declaration");
+            entryNode.addNodeToLeaves(varAssignNode);
+        }
+    }
+
+    @Override
+    public void enterForDeclaration(CParser.ForDeclarationContext ctx) {
+        ForBeginNode forBeginNode = new ForBeginNode(getId() + "ForBegin");
+        ConditionNode condNode = new ConditionNode(getId() + "Condition");
+        conditionNodes.push(condNode);
+
+        ForEndNode forEndNode = new ForEndNode(getId() + "ForEnd");
+        forEndNode.noOtherSuccessor(true);
+
+        entryNode.addNodeToLeaves(forBeginNode);
+        forBeginNode.addSuccessor(condNode);
+
+        continuables.push(forBeginNode);
+        breakables.push(forEndNode);
+    }
+
+    @Override
+    public void exitForDeclaration(CParser.ForDeclarationContext ctx) {
+        ForBeginNode forBeginNode = (ForBeginNode) continuables.pop();
+        ForEndNode forEndNode = (ForEndNode) breakables.pop();
+
+        ConditionNode condNode = conditionNodes.pop();
+        condNode.addNodeToLeaves(forBeginNode);
+        condNode.addSuccessor(forEndNode);
+
+        forEndNode.noOtherSuccessor(false);
+    }
+
+    @Override
+    public void enterForCondition(CParser.ForConditionContext ctx) {
+        super.enterForCondition(ctx);
+    }
+
+    @Override
+    public void enterForExpression(CParser.ForExpressionContext ctx) {
+        super.enterForExpression(ctx);
+    }
+
+    //    public void enterElseStatement(Python3Parser.SuiteContext ctx) {
 //        GraphNode condNode = conditions.getFirst();
 //        GraphNode ifEndNode = ifends.getFirst();
 //
@@ -122,25 +174,6 @@ public class CfgVisitor extends Python3BaseListener {
 //        ifends.pop();
 //    }
 
-
-    @Override
-    public void enterSuite(Python3Parser.SuiteContext ctx) {
-        super.enterSuite(ctx);
-    }
-
-
-
-    @Override
-    public void exitIf_stmt(Python3Parser.If_stmtContext ctx) {
-        GraphNode condNode = conditions.getFirst();
-        GraphNode ifEndNode = ifends.getFirst();
-
-        condNode.addNodeToLeaves(ifEndNode);
-        condNode.addSuccessor(ifEndNode);
-
-        conditions.pop();
-        ifends.pop();
-    }
 
 //    public Object visit(SwitchStatement node, Object data) {
 //        SwitchBeginNode switchBeginNode = new SwitchBeginNode("");
@@ -324,7 +357,8 @@ public class CfgVisitor extends Python3BaseListener {
 //    }
 
 
-    @Override
+
+    //@Override
     public void enterReturn_stmt(Python3Parser.Return_stmtContext ctx) {
         ReturnStmtNode returnNode = new ReturnStmtNode(getId() + "Return");
         returnNode.setLineNumber(1);//TODO
@@ -359,118 +393,5 @@ public class CfgVisitor extends Python3BaseListener {
 //
 //        propagate(node, data);
 //        return data;
-//    }
-
-
-//    @Override
-//    public void enterSimple_stmt(Python3Parser.Simple_stmtContext ctx) {
-//        super.enterSimple_stmt(ctx);
-//    }
-
-    @Override
-    public void enterExpr_stmt(Python3Parser.Expr_stmtContext ctx) {
-        String name = ctx.getText();
-//        if(name.equals("++") || name.equals("--")) {
-//            name = node.jjtGetFirstToken().next.toString();
-//        }
-
-//        String line = readLine(node.jjtGetFirstToken().beginLine);
-        String line = ctx.getText();
-
-        if(line.matches("\\s*\\w*\\s*\\(.*")) {
-            //MethodCallNode methodCallNode = new MethodCallNode(line);
-            MethodCallNode methodCallNode = new MethodCallNode(getId() + "Method call");
-            methodCallNode.setLineNumber(1); //TODO
-            methodCallNode.setFilePath(""); //TODO
-           //HashSet<String> usedVars = this.getUsedVar((SimpleNode) node.jjtGetChild(0));
-           // usedVars.remove(name);
-          //  methodCallNode.setUsedVars(usedVars);
-
-            entryNode.addNodeToLeaves(methodCallNode);
-        } else {
-            //VarAssignNode varAssignNode = new VarAssignNode(line);
-            VarAssignNode varAssignNode = new VarAssignNode(getId() + "Var declaration");
-            varAssignNode.setVarName(name);
-            varAssignNode.setLineNumber(1); //TODO
-            varAssignNode.setFilePath(""); //TODO
-
-//            HashSet<String> usedVars = this.getUsedVar((SimpleNode) node.jjtGetChild(0));
-//            if(!line.matches(".*=.*"+name+".*")) {
-//                usedVars.remove(name);
-//            }
-//            varAssignNode.setUsedVars(usedVars);
-
-            entryNode.addNodeToLeaves(varAssignNode);
-        }
-    }
-
-//    @Override
-//    public void enterSmall_stmt(Python3Parser.Small_stmtContext ctx) {
-//        super.enterSmall_stmt(ctx);
-//    }
-
-
-
-    @Override
-    public void enterStmt(Python3Parser.StmtContext ctx) {
-        /*
-        String name = ctx.getText();
-//        if(name.equals("++") || name.equals("--")) {
-//            name = node.jjtGetFirstToken().next.toString();
-//        }
-
-//        String line = readLine(node.jjtGetFirstToken().beginLine);
-        String line = ctx.getText();
-
-        if(line.matches("\\s*\\w*\\s*\\(.*")) {
-            MethodCallNode methodCallNode = new MethodCallNode(line);
-            methodCallNode.setLineNumber(1); //TODO
-            methodCallNode.setFilePath(""); //TODO
-           //HashSet<String> usedVars = this.getUsedVar((SimpleNode) node.jjtGetChild(0));
-           // usedVars.remove(name);
-          //  methodCallNode.setUsedVars(usedVars);
-
-            entryNode.addNodeToLeaves(methodCallNode);
-        } else {
-            VarAssignNode varAssignNode = new VarAssignNode(line);
-            varAssignNode.setVarName(name);
-            varAssignNode.setLineNumber(1); //TODO
-            varAssignNode.setFilePath(""); //TODO
-
-//            HashSet<String> usedVars = this.getUsedVar((SimpleNode) node.jjtGetChild(0));
-//            if(!line.matches(".*=.*"+name+".*")) {
-//                usedVars.remove(name);
-//            }
-//            varAssignNode.setUsedVars(usedVars);
-
-            entryNode.addNodeToLeaves(varAssignNode);
-        }*/
-    }
-
-//    private String readLine(int lineNumber) {
-//        String line = FileManager.readLine(currentFile, lineNumber);
-//        line = line.replaceAll("\\s", "");
-//        line = line.replace("\\", "\\\\");
-//        line = line.replace("{", "");
-//        line = line.replace("}", "");
-//        line = line.replace("\"", "\\\"");
-//        line = line.replace("while", "");
-//        line = line.replace("if", "");
-//        line = line.replace("else", "");
-//
-//        return line;
-//    }
-
-//    private HashSet<String> getUsedVar(SimpleNode node) {
-//        HashSet<String> res = new HashSet<>();
-//        if(node.toString().contains("Expression") || node.toString().contains("Primary") || node.toString().contains("Arguments") || node.toString().contains("IdentifierSuffix")) {
-//            for(int i = 0; i < node.jjtGetNumChildren(); i++) {
-//                res.addAll(this.getUsedVar((SimpleNode) node.jjtGetChild(i)));
-//            }
-//        } else if(node.toString().equals("Identifier")) {
-//            res.add(node.jjtGetFirstToken().toString());
-//        }
-//
-//        return res;
 //    }
 }

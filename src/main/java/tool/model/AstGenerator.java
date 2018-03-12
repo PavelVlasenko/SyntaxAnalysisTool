@@ -6,6 +6,7 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tool.antlr4.*;
+import tool.model.ast.ClassNode;
 import tool.model.ast.RootNode;
 import tool.visitors.ast.CAstVisitor;
 import tool.visitors.ast.PythonAstVisitor;
@@ -44,7 +45,10 @@ public class AstGenerator {
 
         TreeNode ast = new RootNode("AST");
         ast.setFilePath(fileName);
-        CAstVisitor visitor = new CAstVisitor(ast);
+        ClassNode classNode = new ClassNode(fileName);
+        classNode.setFilePath(fileName);
+        CAstVisitor visitor = new CAstVisitor(classNode);
+        ast.addChild(classNode);
 
         ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
         parseTreeWalker.walk(visitor, tree);
