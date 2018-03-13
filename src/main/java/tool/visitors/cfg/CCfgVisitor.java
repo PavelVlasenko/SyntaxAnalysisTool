@@ -17,17 +17,16 @@ public class CCfgVisitor extends CBaseListener {
     private HashMap<String, ArrayList<EntryNode>> cfgs = new HashMap<>();
     private EntryNode entryNode;
     private ExitNode exitNode;
-    private LinkedList<GraphNode> breakables  = new LinkedList<>();
-    private LinkedList<GraphNode> continuables  = new LinkedList<>();
+
     private LinkedList<GraphNode> conditions  = new LinkedList<>();
-    private LinkedList<GraphNode> ifends  = new LinkedList<>();
-    private boolean switchBreaked = false;
+
+    private LinkedList<GraphNode> cycleBeginNodes = new LinkedList<>();
+    private LinkedList<GraphNode> cycleEndNodes  = new LinkedList<>();
+
+    private ArrayList<ParseTree> elseStatements = new ArrayList<>();
+    private GraphNode currentNode;
 
     private int identifierGen = 0;
-    private ArrayList<ParseTree> elseStatements = new ArrayList<>();
-    private LinkedList<GraphNode> cycleNodes = new LinkedList<>();
-
-    private GraphNode currentNode;
 
     private String getId() {
         String id = String.valueOf(identifierGen) + ".";
@@ -97,7 +96,13 @@ public class CCfgVisitor extends CBaseListener {
     public void exitSelectionStatement(CParser.SelectionStatementContext ctx) {
         IfEndNode ifEndNode = new IfEndNode(getId() + "IfEnd");
         GraphNode condNode = conditions.pop();
-        condNode.addNodeToLeaves(ifEndNode);
+        if(!cycleEndNodes.isEmpty()) {
+            condNode.addNodeToLeaves(ifEndNode, cycleEndNodes.getFirst());
+        }
+        else {
+            condNode.addNodeToLeaves(ifEndNode);
+        }
+        condNode.addSuccessor(ifEndNode);
         currentNode = ifEndNode;
     }
 
@@ -138,36 +143,62 @@ public class CCfgVisitor extends CBaseListener {
     }
 
     @Override
+    public void enterJumpStatement(CParser.JumpStatementContext ctx) {
+        String text = ctx.getText();
+        if(text.startsWith("return")) {
+            ReturnStmtNode returnStmtNode = new ReturnStmtNode(getId() + "Return");
+            currentNode.addSuccessor(returnStmtNode);
+            returnStmtNode.addSuccessor(exitNode);
+        }
+        else if(text.startsWith("break")) {
+            BreakStmtNode breakStmtNode = new BreakStmtNode(getId() +"Break");
+            currentNode.addSuccessor(breakStmtNode);
+            breakStmtNode.addSuccessor(cycleEndNodes.getFirst());
+            currentNode = conditions.getFirst();
+        }
+        else if(text.startsWith("continue")) {
+            ContinueStmtNode continueStmtNode = new ContinueStmtNode(getId() + "Continue");
+            currentNode.addSuccessor(continueStmtNode);
+            GraphNode condNode = conditions.getFirst();
+            currentNode = condNode;
+        }
+
+    }
+
+    @Override
     public void enterIterationStatement(CParser.IterationStatementContext ctx) {
         String text = ctx.getText();
         GraphNode beginNode = null;
+        GraphNode endNode = null;
 
         if(text.startsWith("while")) {
             beginNode = new WhileBeginNode("WhileBegin");
+            endNode = new WhileEndNode(getId() + "WhileEnd");
         }
         else if(text.startsWith("for")) {
             beginNode = new ForBeginNode(getId() + "ForBegin");
+            endNode = new ForEndNode(getId() + "ForEnd");
+        }
+        else if(text.startsWith("switch")) {
+            beginNode = new ForBeginNode(getId() + "SwitchBegin");
+            endNode = new ForEndNode(getId() + "SwitchEnd");
         }
         ConditionNode condNode = new ConditionNode(getId() + "Condition");
-        cycleNodes.push(beginNode);
+        cycleBeginNodes.push(beginNode);
         conditions.push(condNode);
         currentNode.addSuccessor(beginNode);
         beginNode.addSuccessor(condNode);
         currentNode = condNode;
+
+        cycleEndNodes.add(endNode);
     }
 
     @Override
     public void exitIterationStatement(CParser.IterationStatementContext ctx) {
-        String text = ctx.getText();
-        GraphNode endNode = null;
-        if(text.startsWith("while")) {
-            endNode = new WhileEndNode(getId() + "WhileEnd");
-        }
-        else if(text.startsWith("for")) {
-            endNode = new ForEndNode(getId() + "ForEnd");
-        }
-        GraphNode iterationBeginNode = cycleNodes.pop();
-        iterationBeginNode.addNodeToLeaves(iterationBeginNode);
+        GraphNode beginNode = cycleBeginNodes.pop();
+        GraphNode endNode = cycleEndNodes.pop();
+
+        beginNode.addNodeToLeaves(beginNode, endNode);
 
         ConditionNode condNode = (ConditionNode) conditions.pop();
         condNode.addSuccessor(endNode);

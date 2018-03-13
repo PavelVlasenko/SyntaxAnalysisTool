@@ -1,5 +1,7 @@
 package tool.model;
 
+import tool.model.cfg.ExitNode;
+
 import java.util.ArrayList;
 
 public class GraphNode extends MyNode {
@@ -72,17 +74,26 @@ public class GraphNode extends MyNode {
     public void addNodeToLeaves(GraphNode node) {
         this.visited = new ArrayList<>();
         this.visited.add(node);
-        addNodeLeaves(this, node);
+        addNodeLeaves(this, node, null);
     }
 
-    private void addNodeLeaves(GraphNode graphNode, GraphNode node) {
+    public void addNodeToLeaves(GraphNode node, GraphNode excludeNode) {
+        this.visited = new ArrayList<>();
+        this.visited.add(node);
+        addNodeLeaves(this, node, excludeNode);
+    }
+
+    private void addNodeLeaves(GraphNode graphNode, GraphNode node, GraphNode excludeNode) {
+        if(graphNode instanceof ExitNode || graphNode.equals(excludeNode)) {
+            return;
+        }
         if(graphNode.getSuccessors().size() == 0) {
             graphNode.addSuccessor(node);
         }
         for(GraphNode succ : graphNode.getSuccessors()) {
             if(!visited.contains(succ)) {
                 visited.add(succ);
-                this.addNodeLeaves(succ, node);
+                this.addNodeLeaves(succ, node, excludeNode);
             }
         }
     }
