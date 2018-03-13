@@ -1,7 +1,9 @@
 package tool.visitors.cfg;
 
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tool.antlr4.CParser;
 import tool.antlr4.Python3BaseListener;
 import tool.antlr4.Python3Parser;
 import tool.model.GraphNode;
@@ -16,11 +18,14 @@ public class PythonCfgVisitor extends Python3BaseListener {
     private HashMap<String, ArrayList<EntryNode>> cfgs = new HashMap<>();
     private EntryNode entryNode;
     private ExitNode exitNode;
-    private LinkedList<GraphNode> breakables;
-    private LinkedList<GraphNode> continuables;
-    private LinkedList<GraphNode> conditions;
-    private LinkedList<GraphNode> ifends;
-    private boolean switchBreaked = false;
+
+    private LinkedList<GraphNode> conditions  = new LinkedList<>();
+
+    private LinkedList<GraphNode> cycleBeginNodes = new LinkedList<>();
+    private LinkedList<GraphNode> cycleEndNodes  = new LinkedList<>();
+
+    private ArrayList<ParseTree> elseStatements = new ArrayList<>();
+    private GraphNode currentNode;
 
     private int identifierGen = 0;
 
@@ -33,33 +38,23 @@ public class PythonCfgVisitor extends Python3BaseListener {
     private void initNewCFG(String methodName) {
         String entryName = "Entry \n" + methodName;
         entryNode = new EntryNode(getId() + entryName);
-        exitNode = new ExitNode(getId() + entryName);
+        entryNode.setFilePath(""); //TODO
+        entryNode.setMethodName(methodName);
+        currentNode = entryNode;
 
-        exitNode.noOtherSuccessor(true);
-
+        exitNode = new ExitNode(getId() + "Exit \nmain");
         entryNode.setExitNode(exitNode);
-        exitNode.setLineNumber(entryNode.getLineNumber());
-        exitNode.setFilePath("");
-
-        breakables = new LinkedList<>();
-        continuables = new LinkedList<>();
-        conditions = new LinkedList<>();
-        ifends = new LinkedList<>();
     }
 
     private void endNewCFG() {
-        if(!cfgs.containsKey(entryNode.getFilePath())) {
-            cfgs.put(entryNode.getFilePath(), new ArrayList<>());
-        }
+        cfgs.put(entryNode.getFilePath(), new ArrayList<>());
         entryNode.addNodeToLeaves(exitNode);
-        entryNode.addSuccessor(exitNode);
         cfgs.get(entryNode.getFilePath()).add(entryNode);
     }
 
     public HashMap<String, ArrayList<EntryNode>> getCFGs() {
         return cfgs;
     }
-
 
     @Override
     public void enterFuncdef(Python3Parser.FuncdefContext ctx) {
@@ -79,46 +74,128 @@ public class PythonCfgVisitor extends Python3BaseListener {
     public void enterIf_stmt(Python3Parser.If_stmtContext ctx) {
         IfBeginNode ifBeginNode = new IfBeginNode(getId() + "IfBegin");
         ConditionNode condNode = new ConditionNode(getId() +"Condition");
-        IfEndNode ifEndNode = new IfEndNode(getId() + "IfEnd");
-
-        entryNode.addNodeToLeaves(ifBeginNode);
-        ifBeginNode.addSuccessor(condNode);
-
         conditions.push(condNode);
-        ifends.push(ifEndNode);
 
-        Python3Parser.SuiteContext suiteContext = ctx.getChild(Python3Parser.SuiteContext.class, 1);
+        currentNode.addNodeToLeaves(ifBeginNode);
+        ifBeginNode.addSuccessor(condNode);
+        currentNode = condNode;
+
+        int childCount = ctx.getChildCount();
+        for(int i = 0; i < childCount; i++) {
+            String nodeName = ctx.getChild(i).getText();
+            if("else".equals(nodeName) ||
+                    "else if".equals(nodeName)) {
+                if(childCount > (i + 1)) {
+                    elseStatements.add(ctx.getChild(i + 1));
+                }
+            }
+        }
+
     }
 
     @Override
     public void exitIf_stmt(Python3Parser.If_stmtContext ctx) {
-
-    }
-
-    @Override
-    public void enterReturn_stmt(Python3Parser.Return_stmtContext ctx) {
-        ReturnStmtNode returnNode = new ReturnStmtNode(getId() + "Return");
-        entryNode.addNodeToLeaves(returnNode);
-        if(returnNode.getPredecessors().size() > 0) {
-            returnNode.addSuccessor(exitNode);
-            returnNode.noOtherSuccessor(true);
+        IfEndNode ifEndNode = new IfEndNode(getId() + "IfEnd");
+        GraphNode condNode = conditions.pop();
+        if(!cycleEndNodes.isEmpty()) {
+            condNode.addNodeToLeaves(ifEndNode, cycleEndNodes.getFirst());
         }
-
-        switchBreaked = true;
+        else {
+            condNode.addNodeToLeaves(ifEndNode);
+        }
+        condNode.addSuccessor(ifEndNode);
+        currentNode = ifEndNode;
     }
 
     @Override
     public void enterExpr_stmt(Python3Parser.Expr_stmtContext ctx) {
-        String name = ctx.getText();
         String line = ctx.getText();
-
         if(line.matches("\\s*\\w*\\s*\\(.*")) {
             MethodCallNode methodCallNode = new MethodCallNode(getId() + "Method call");
-            entryNode.addNodeToLeaves(methodCallNode);
+            currentNode.addSuccessor(methodCallNode);
+            currentNode = methodCallNode;
         } else {
             VarAssignNode varAssignNode = new VarAssignNode(getId() + "Var declaration");
-            varAssignNode.setVarName(name);
-            entryNode.addNodeToLeaves(varAssignNode);
+            currentNode.addSuccessor(varAssignNode);
+            currentNode = varAssignNode;
         }
+    }
+
+    @Override
+    public void enterStmt(Python3Parser.StmtContext ctx) {
+        if(elseStatements.contains(ctx)) {
+            GraphNode condNode = conditions.getFirst();
+            currentNode = condNode;
+        }
+    }
+
+    @Override
+    public void enterBreak_stmt(Python3Parser.Break_stmtContext ctx) {
+        BreakStmtNode breakStmtNode = new BreakStmtNode(getId() +"Break");
+        currentNode.addSuccessor(breakStmtNode);
+        breakStmtNode.addSuccessor(cycleEndNodes.getFirst());
+        currentNode = conditions.getFirst();
+    }
+
+    @Override
+    public void enterContinue_stmt(Python3Parser.Continue_stmtContext ctx) {
+        ContinueStmtNode continueStmtNode = new ContinueStmtNode(getId() + "Continue");
+        currentNode.addSuccessor(continueStmtNode);
+        continueStmtNode.addSuccessor(cycleBeginNodes.getFirst());
+        GraphNode condNode = conditions.getFirst();
+        currentNode = condNode;
+    }
+
+    @Override
+    public void enterReturn_stmt(Python3Parser.Return_stmtContext ctx) {
+        ReturnStmtNode returnStmtNode = new ReturnStmtNode(getId() + "Return");
+        currentNode.addSuccessor(returnStmtNode);
+        returnStmtNode.addSuccessor(exitNode);
+    }
+
+    @Override
+    public void enterWhile_stmt(Python3Parser.While_stmtContext ctx) {
+        GraphNode beginNode = new WhileBeginNode("WhileBegin");
+        GraphNode endNode = new WhileEndNode(getId() + "WhileEnd");
+        enterIterationStatement(beginNode, endNode);
+    }
+
+    @Override
+    public void exitWhile_stmt(Python3Parser.While_stmtContext ctx) {
+        exitIterationStatement();
+    }
+
+    @Override
+    public void enterFor_stmt(Python3Parser.For_stmtContext ctx) {
+        GraphNode beginNode = new ForBeginNode(getId() + "ForBegin");
+        GraphNode endNode = new ForEndNode(getId() + "ForEnd");
+        enterIterationStatement(beginNode, endNode);
+    }
+
+    @Override
+    public void exitFor_stmt(Python3Parser.For_stmtContext ctx) {
+        exitIterationStatement();
+    }
+
+    private void enterIterationStatement(GraphNode beginNode, GraphNode endNode) {
+        ConditionNode condNode = new ConditionNode(getId() + "Condition");
+        cycleBeginNodes.push(beginNode);
+        conditions.push(condNode);
+        currentNode.addSuccessor(beginNode);
+        beginNode.addSuccessor(condNode);
+        currentNode = condNode;
+
+        cycleEndNodes.add(endNode);
+    }
+
+    private void exitIterationStatement() {
+        GraphNode beginNode = cycleBeginNodes.pop();
+        GraphNode endNode = cycleEndNodes.pop();
+
+        beginNode.addNodeToLeaves(beginNode, endNode);
+
+        ConditionNode condNode = (ConditionNode) conditions.pop();
+        condNode.addSuccessor(endNode);
+        currentNode = endNode;
     }
 }
