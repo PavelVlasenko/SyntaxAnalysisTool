@@ -2,6 +2,7 @@ package tool.model.cfg;
 
 public class EntryNode extends CFGNode {
     private ExitNode exitNode;
+    private String methodName;
 
     public EntryNode(String name) {
         super(name);
@@ -18,5 +19,13 @@ public class EntryNode extends CFGNode {
 
     public void setExitNode(ExitNode exitNode) {
         this.exitNode = exitNode;
+    }
+
+    public String getMethodName() {
+        return methodName;
+    }
+
+    public void setMethodName(String methodName) {
+        this.methodName = methodName;
     }
 }

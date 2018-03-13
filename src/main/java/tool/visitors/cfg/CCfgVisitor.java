@@ -1,5 +1,6 @@
 package tool.visitors.cfg;
 
+import org.antlr.v4.runtime.tree.ParseTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import tool.antlr4.CBaseListener;
@@ -23,8 +24,10 @@ public class CCfgVisitor extends CBaseListener {
     private boolean switchBreaked = false;
 
     private int identifierGen = 0;
-    private LinkedList<ConditionNode> conditionNodes = new LinkedList<>();
-    private ArrayList<CParser.StatementContext> elseStatements = new ArrayList<>();
+    private ArrayList<ParseTree> elseStatements = new ArrayList<>();
+    private LinkedList<GraphNode> cycleNodes = new LinkedList<>();
+
+    private GraphNode currentNode;
 
     private String getId() {
         String id = String.valueOf(identifierGen) + ".";
@@ -36,17 +39,16 @@ public class CCfgVisitor extends CBaseListener {
         String entryName = "Entry \n" + methodName;
         entryNode = new EntryNode(getId() + entryName);
         entryNode.setFilePath(""); //TODO
-        exitNode = new ExitNode(getId() + entryName);
-        exitNode.noOtherSuccessor(true);
+        entryNode.setMethodName(methodName);
+        currentNode = entryNode;
+
+        exitNode = new ExitNode(getId() + "Exit \nmain");
         entryNode.setExitNode(exitNode);
     }
 
     private void endNewCFG() {
-        if(!cfgs.containsKey(entryNode.getFilePath())) {
-            cfgs.put(entryNode.getFilePath(), new ArrayList<>());
-        }
+        cfgs.put(entryNode.getFilePath(), new ArrayList<>());
         entryNode.addNodeToLeaves(exitNode);
-        entryNode.addSuccessor(exitNode);
         cfgs.get(entryNode.getFilePath()).add(entryNode);
     }
 
@@ -72,18 +74,31 @@ public class CCfgVisitor extends CBaseListener {
     public void enterSelectionStatement(CParser.SelectionStatementContext ctx) {
         IfBeginNode ifBeginNode = new IfBeginNode(getId() + "IfBegin");
         ConditionNode condNode = new ConditionNode(getId() +"Condition");//TODO
-        IfEndNode ifEndNode = new IfEndNode(getId() + "IfEnd");
-        entryNode.addNodeToLeaves(ifBeginNode);
-        ifBeginNode.addSuccessor(condNode);
-
         conditions.push(condNode);
-        ifends.push(ifEndNode);
+
+        currentNode.addNodeToLeaves(ifBeginNode);
+        ifBeginNode.addSuccessor(condNode);
+        currentNode = condNode;
+
+        int childCount = ctx.getChildCount();
+        for(int i = 0; i < childCount; i++) {
+            String nodeName = ctx.getChild(i).getText();
+            if("else".equals(nodeName) ||
+                    "else if".equals(nodeName)) {
+                if(childCount > (i + 1)) {
+                    elseStatements.add(ctx.getChild(i + 1));
+                }
+            }
+        }
 
     }
 
     @Override
     public void exitSelectionStatement(CParser.SelectionStatementContext ctx) {
-
+        IfEndNode ifEndNode = new IfEndNode(getId() + "IfEnd");
+        GraphNode condNode = conditions.pop();
+        condNode.addNodeToLeaves(ifEndNode);
+        currentNode = ifEndNode;
     }
 
     @Override
@@ -96,7 +111,7 @@ public class CCfgVisitor extends CBaseListener {
         if(ctx.getText().matches("\\s*\\w*\\s*\\(.*")) {
             String line = ctx.getText();
             MethodCallNode methodCallNode = new MethodCallNode(getId() + "Method call");
-            entryNode.addNodeToLeaves(methodCallNode);
+            currentNode.addSuccessor(methodCallNode);
         }
     }
 
@@ -105,10 +120,12 @@ public class CCfgVisitor extends CBaseListener {
         String line = ctx.getText();
         if(line.matches("\\s*\\w*\\s*\\(.*")) {
             MethodCallNode methodCallNode = new MethodCallNode(getId() + "Method call");
-            entryNode.addNodeToLeaves(methodCallNode);
+            currentNode.addSuccessor(methodCallNode);
+            currentNode = methodCallNode;
         } else {
             VarAssignNode varAssignNode = new VarAssignNode(getId() + "Var declaration");
-            entryNode.addNodeToLeaves(varAssignNode);
+            currentNode.addSuccessor(varAssignNode);
+            currentNode = varAssignNode;
         }
     }
 
@@ -116,58 +133,44 @@ public class CCfgVisitor extends CBaseListener {
     public void enterStatement(CParser.StatementContext ctx) {
         if(elseStatements.contains(ctx)) {
             GraphNode condNode = conditions.getFirst();
-            GraphNode ifEndNode = ifends.getFirst();
-
-            GraphNode trueCaseSubGraph = condNode.getSuccessors().get(0);
-            condNode.removeSuccessor(0);
-
-            if(condNode.getSuccessors().isEmpty()) {
-                condNode.addSuccessor(ifEndNode);
-            }
-
-            condNode.addSuccessor(0, trueCaseSubGraph);
-            condNode.addNodeToLeaves(ifEndNode);
-
-            conditions.pop();
-            ifends.pop();
+            currentNode = condNode;
         }
     }
 
     @Override
-    public void enterForDeclaration(CParser.ForDeclarationContext ctx) {
-        ForBeginNode forBeginNode = new ForBeginNode(getId() + "ForBegin");
+    public void enterIterationStatement(CParser.IterationStatementContext ctx) {
+        String text = ctx.getText();
+        GraphNode beginNode = null;
+
+        if(text.startsWith("while")) {
+            beginNode = new WhileBeginNode("WhileBegin");
+        }
+        else if(text.startsWith("for")) {
+            beginNode = new ForBeginNode(getId() + "ForBegin");
+        }
         ConditionNode condNode = new ConditionNode(getId() + "Condition");
-        conditionNodes.push(condNode);
-
-        ForEndNode forEndNode = new ForEndNode(getId() + "ForEnd");
-        forEndNode.noOtherSuccessor(true);
-
-        entryNode.addNodeToLeaves(forBeginNode);
-        forBeginNode.addSuccessor(condNode);
-
-        continuables.push(forBeginNode);
-        breakables.push(forEndNode);
+        cycleNodes.push(beginNode);
+        conditions.push(condNode);
+        currentNode.addSuccessor(beginNode);
+        beginNode.addSuccessor(condNode);
+        currentNode = condNode;
     }
 
     @Override
-    public void exitForDeclaration(CParser.ForDeclarationContext ctx) {
-        ForBeginNode forBeginNode = (ForBeginNode) continuables.pop();
-        ForEndNode forEndNode = (ForEndNode) breakables.pop();
+    public void exitIterationStatement(CParser.IterationStatementContext ctx) {
+        String text = ctx.getText();
+        GraphNode endNode = null;
+        if(text.startsWith("while")) {
+            endNode = new WhileEndNode(getId() + "WhileEnd");
+        }
+        else if(text.startsWith("for")) {
+            endNode = new ForEndNode(getId() + "ForEnd");
+        }
+        GraphNode iterationBeginNode = cycleNodes.pop();
+        iterationBeginNode.addNodeToLeaves(iterationBeginNode);
 
-        ConditionNode condNode = conditionNodes.pop();
-        condNode.addNodeToLeaves(forBeginNode);
-        condNode.addSuccessor(forEndNode);
-
-        forEndNode.noOtherSuccessor(false);
-    }
-
-    @Override
-    public void enterForCondition(CParser.ForConditionContext ctx) {
-        super.enterForCondition(ctx);
-    }
-
-    @Override
-    public void enterForExpression(CParser.ForExpressionContext ctx) {
-        super.enterForExpression(ctx);
+        ConditionNode condNode = (ConditionNode) conditions.pop();
+        condNode.addSuccessor(endNode);
+        currentNode = endNode;
     }
 }

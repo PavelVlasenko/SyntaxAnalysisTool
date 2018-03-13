@@ -18,9 +18,12 @@ public class CfgGraphBuilder {
     private static final Logger LOGGER = LoggerFactory.getLogger(CfgGraphBuilder.class);
     private HashMap<Integer, Node> nodes = new HashMap<>();
     private List<Node> directedNodes = new ArrayList<>();
+    private List<GraphNode> visited = new ArrayList<>();
 
     public Graph createGraph(EntryNode entryNode) {
         createNodes(entryNode);
+
+        visited = new ArrayList<>();
         processGraph(entryNode);
 
         Node[] directedArray = new Node[directedNodes.size()];
@@ -29,11 +32,22 @@ public class CfgGraphBuilder {
     }
 
     private void processGraph(GraphNode node) {
+        if(visited.contains(node)) {
+            LOGGER.info("Skip node, cause it's already visited id={}, name={}", node.getId(), node.getName());
+            return;
+        }
+        LOGGER.info("Process node id={}, name={}", node.getId(), node.getName());
+
+        List<Node> childNodes = new ArrayList<>();
         for(GraphNode childNode : node.getSuccessors()) {
-            LOGGER.info("Process node id={}, name={}", childNode.getId(), childNode.getName());
-            Node from = nodes.get(node.getId());
             Node to = nodes.get(childNode.getId());
-            directedNodes.add(from.link(to));
+            childNodes.add(to);
+        }
+        Node from = nodes.get(node.getId());
+        Node[] nodesArray = new Node[childNodes.size()];
+        directedNodes.add(from.link(childNodes.toArray(nodesArray)));
+        visited.add(node);
+        for(GraphNode childNode : node.getSuccessors()) {
             processGraph(childNode);
         }
     }
@@ -41,12 +55,16 @@ public class CfgGraphBuilder {
     private void createNodes(EntryNode entryNode) {
         nodes.put(entryNode.getId(), node(entryNode.getName()));
         createNode(entryNode);
+        visited.add(entryNode);
     }
 
     private void createNode(GraphNode cfgNode) {
         for(GraphNode graphNode : cfgNode.getSuccessors()) {
-            nodes.put(graphNode.getId(), node(graphNode.getName()));
-            createNode(graphNode);
+            if(!visited.contains(graphNode)) {
+                nodes.put(graphNode.getId(), node(graphNode.getName()));
+                visited.add(graphNode);
+                createNode(graphNode);
+            }
         }
     }
 }
