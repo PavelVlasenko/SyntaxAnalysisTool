@@ -159,6 +159,7 @@ public class CCfgVisitor extends CBaseListener {
         else if(text.startsWith("continue")) {
             ContinueStmtNode continueStmtNode = new ContinueStmtNode(getId() + "Continue");
             currentNode.addSuccessor(continueStmtNode);
+            continueStmtNode.addSuccessor(cycleBeginNodes.getFirst());
             GraphNode condNode = conditions.getFirst();
             currentNode = condNode;
         }
