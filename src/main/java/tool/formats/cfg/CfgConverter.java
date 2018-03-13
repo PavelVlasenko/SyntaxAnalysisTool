@@ -39,7 +39,7 @@ public class CfgConverter {
         LOGGER.info("Save CFG graph to {}", filePath);
         try {
             Graphviz.fromGraph(graph).width(900).render(format)
-                    .toFile(new File(filePath  + FormatResolver.resolve(format)));
+                    .toFile(new File(filePath  + "_" + FormatResolver.resolve(format)));
         } catch (IOException e) {
             e.printStackTrace();
         }

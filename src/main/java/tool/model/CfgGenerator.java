@@ -15,6 +15,7 @@ import tool.model.cfg.EntryNode;
 import tool.visitors.cfg.CCfgVisitor;
 import tool.visitors.cfg.PythonCfgVisitor;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -24,14 +25,14 @@ public class CfgGenerator {
     public static final Logger LOGGER = LoggerFactory.getLogger(CfgGenerator.class);
 
     public HashMap<String, ArrayList<EntryNode>> generatePythonCfg(String fileName) {
-        LOGGER.info("Generate Python AST.");
+        LOGGER.info("Generate Python CFG.");
         Python3Lexer lexer = new Python3Lexer(getStream(fileName));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         Python3Parser parser = new Python3Parser(tokens);
 
         ParseTree tree = parser.file_input();
 
-        PythonCfgVisitor visitor = new PythonCfgVisitor();
+        PythonCfgVisitor visitor = new PythonCfgVisitor(fileName.substring(fileName.lastIndexOf(File.separator) + 1));
 
         ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
         parseTreeWalker.walk(visitor, tree);
@@ -40,14 +41,14 @@ public class CfgGenerator {
     }
 
     public HashMap<String, ArrayList<EntryNode>> generateCCfg(String fileName) {
-        LOGGER.info("Generate Python AST.");
+        LOGGER.info("Generate C CFG.");
         CLexer lexer = new CLexer(getStream(fileName));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         CParser parser = new CParser(tokens);
 
         ParseTree tree = parser.compilationUnit();
 
-        CCfgVisitor visitor = new CCfgVisitor();
+        CCfgVisitor visitor = new CCfgVisitor(fileName);
 
         ParseTreeWalker parseTreeWalker = new ParseTreeWalker();
         parseTreeWalker.walk(visitor, tree);

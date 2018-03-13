@@ -13,7 +13,7 @@ public class UmlConverterTest {
     @Test
     public void PythonUmlGenerationTest() {
         AstGenerator astGenerator = new AstGenerator();
-        TreeNode ast = astGenerator.generatePythonAst("examples/python/python_example2.py");
+        TreeNode ast = astGenerator.generatePythonAst("examples\\python\\python_example2.py");
 
         UmlConverter umlConverter = new UmlConverter();
         Graph graph = umlConverter.createUml(Collections.singletonList(ast));
@@ -23,7 +23,7 @@ public class UmlConverterTest {
     @Test
     public void CUmlGenerationTest() {
         AstGenerator astGenerator = new AstGenerator();
-        TreeNode ast = astGenerator.generateCAst("examples/c/c_example.c");
+        TreeNode ast = astGenerator.generateCAst("examples\\c\\c_example.c");
 
         UmlConverter umlConverter = new UmlConverter();
         Graph graph = umlConverter.createUml(Collections.singletonList(ast));

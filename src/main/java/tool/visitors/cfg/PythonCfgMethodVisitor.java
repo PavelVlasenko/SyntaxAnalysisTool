@@ -3,8 +3,8 @@ package tool.visitors.cfg;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import tool.antlr4.CBaseListener;
-import tool.antlr4.CParser;
+import tool.antlr4.Python3BaseListener;
+import tool.antlr4.Python3Parser;
 import tool.model.GraphNode;
 import tool.model.cfg.*;
 
@@ -12,9 +12,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 
-public class CCfgVisitor extends CBaseListener {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CCfgVisitor.class);
-    private HashMap<String, ArrayList<EntryNode>> cfgs = new HashMap<>();
+public class PythonCfgMethodVisitor extends Python3BaseListener {
+
+    private HashMap<String, ArrayList<EntryNode>> cfgs;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PythonCfgVisitor.class);
+
     private EntryNode entryNode;
     private ExitNode exitNode;
 
@@ -25,12 +28,12 @@ public class CCfgVisitor extends CBaseListener {
 
     private ArrayList<ParseTree> elseStatements = new ArrayList<>();
     private GraphNode currentNode;
-
-    private int identifierGen = 0;
-    private boolean inMethod = false;
     private String fileName;
 
-    public CCfgVisitor(String fileName) {
+    private int identifierGen = 0;
+
+    public PythonCfgMethodVisitor(HashMap<String, ArrayList<EntryNode>> cfgs, String fileName) {
+        this.cfgs = cfgs;
         this.fileName = fileName;
     }
 
@@ -62,8 +65,7 @@ public class CCfgVisitor extends CBaseListener {
     }
 
     @Override
-    public void enterFunctionDefinition(CParser.FunctionDefinitionContext ctx) {
-        inMethod = true;
+    public void enterFuncdef(Python3Parser.FuncdefContext ctx) {
         String text = ctx.getText();
         String methodName = text.substring(0, text.indexOf("("));
         LOGGER.info("Enter func def {}", methodName);
@@ -71,17 +73,15 @@ public class CCfgVisitor extends CBaseListener {
     }
 
     @Override
-    public void exitFunctionDefinition(CParser.FunctionDefinitionContext ctx) {
+    public void exitFuncdef(Python3Parser.FuncdefContext ctx) {
         LOGGER.info("Exit func def");
         endNewCFG();
-        inMethod = false;
     }
 
     @Override
-    public void enterSelectionStatement(CParser.SelectionStatementContext ctx) {
-        if(!inMethod) return;
+    public void enterIf_stmt(Python3Parser.If_stmtContext ctx) {
         IfBeginNode ifBeginNode = new IfBeginNode(getId() + "IfBegin");
-        ConditionNode condNode = new ConditionNode(getId() +"Condition");//TODO
+        ConditionNode condNode = new ConditionNode(getId() +"Condition");
         conditions.push(condNode);
 
         currentNode.addNodeToLeaves(ifBeginNode);
@@ -102,8 +102,7 @@ public class CCfgVisitor extends CBaseListener {
     }
 
     @Override
-    public void exitSelectionStatement(CParser.SelectionStatementContext ctx) {
-        if(!inMethod) return;
+    public void exitIf_stmt(Python3Parser.If_stmtContext ctx) {
         IfEndNode ifEndNode = new IfEndNode(getId() + "IfEnd");
         GraphNode condNode = conditions.pop();
         if(!cycleEndNodes.isEmpty()) {
@@ -117,18 +116,7 @@ public class CCfgVisitor extends CBaseListener {
     }
 
     @Override
-    public void enterExpression(CParser.ExpressionContext ctx) {
-        if(!inMethod) return;
-        if(ctx.getText().matches("\\s*\\w*\\s*\\(.*")) {
-            String line = ctx.getText();
-            MethodCallNode methodCallNode = new MethodCallNode(getId() + "Method call");
-            currentNode.addSuccessor(methodCallNode);
-        }
-    }
-
-    @Override
-    public void enterDeclaration(CParser.DeclarationContext ctx) {
-        if(!inMethod) return;
+    public void enterExpr_stmt(Python3Parser.Expr_stmtContext ctx) {
         String line = ctx.getText();
         if(line.matches("\\s*\\w*\\s*\\(.*")) {
             MethodCallNode methodCallNode = new MethodCallNode(getId() + "Method call");
@@ -142,8 +130,7 @@ public class CCfgVisitor extends CBaseListener {
     }
 
     @Override
-    public void enterStatement(CParser.StatementContext ctx) {
-        if(!inMethod) return;
+    public void enterStmt(Python3Parser.StmtContext ctx) {
         if(elseStatements.contains(ctx)) {
             GraphNode condNode = conditions.getFirst();
             currentNode = condNode;
@@ -151,56 +138,54 @@ public class CCfgVisitor extends CBaseListener {
     }
 
     @Override
-    public void enterJumpStatement(CParser.JumpStatementContext ctx) {
-        if(!inMethod) return;
-        String text = ctx.getText();
-        if(text.startsWith("return")) {
-            ReturnStmtNode returnStmtNode = new ReturnStmtNode(getId() + "Return");
-            currentNode.addSuccessor(returnStmtNode);
-            returnStmtNode.addSuccessor(exitNode);
-        }
-        else if(text.startsWith("break")) {
-            BreakStmtNode breakStmtNode = new BreakStmtNode(getId() +"Break");
-            currentNode.addSuccessor(breakStmtNode);
-            breakStmtNode.addSuccessor(cycleEndNodes.getFirst());
-            currentNode = conditions.getFirst();
-        }
-        else if(text.startsWith("continue")) {
-            ContinueStmtNode continueStmtNode = new ContinueStmtNode(getId() + "Continue");
-            currentNode.addSuccessor(continueStmtNode);
-            continueStmtNode.addSuccessor(cycleBeginNodes.getFirst());
-            GraphNode condNode = conditions.getFirst();
-            currentNode = condNode;
-        }
-
+    public void enterBreak_stmt(Python3Parser.Break_stmtContext ctx) {
+        BreakStmtNode breakStmtNode = new BreakStmtNode(getId() +"Break");
+        currentNode.addSuccessor(breakStmtNode);
+        breakStmtNode.addSuccessor(cycleEndNodes.getFirst());
+        currentNode = conditions.getFirst();
     }
 
     @Override
-    public void enterIterationStatement(CParser.IterationStatementContext ctx) {
-        if(!inMethod) return;
-        String text = ctx.getText();
-        GraphNode beginNode = null;
-        GraphNode endNode = null;
+    public void enterContinue_stmt(Python3Parser.Continue_stmtContext ctx) {
+        ContinueStmtNode continueStmtNode = new ContinueStmtNode(getId() + "Continue");
+        currentNode.addSuccessor(continueStmtNode);
+        continueStmtNode.addSuccessor(cycleBeginNodes.getFirst());
+        GraphNode condNode = conditions.getFirst();
+        currentNode = condNode;
+    }
 
-        if(text.startsWith("while")) {
-            beginNode = new WhileBeginNode("WhileBegin");
-            endNode = new WhileEndNode(getId() + "WhileEnd");
-        }
-        else if(text.startsWith("for")) {
-            beginNode = new ForBeginNode(getId() + "ForBegin");
-            endNode = new ForEndNode(getId() + "ForEnd");
-        }
-        else if(text.startsWith("switch")) {
-            beginNode = new ForBeginNode(getId() + "SwitchBegin");
-            endNode = new ForEndNode(getId() + "SwitchEnd");
-        }
-        else if(text.startsWith("do")) {
-            beginNode = new DoWhileBeginNode(getId() + "DoWhileBegin");
-            endNode = new DoWhileEndNode(getId() + "DoWhileEnd");
-        }
-        else {
-            LOGGER.warn("Unknown iteration statement");
-        }
+    @Override
+    public void enterReturn_stmt(Python3Parser.Return_stmtContext ctx) {
+        ReturnStmtNode returnStmtNode = new ReturnStmtNode(getId() + "Return");
+        currentNode.addSuccessor(returnStmtNode);
+        returnStmtNode.addSuccessor(exitNode);
+    }
+
+    @Override
+    public void enterWhile_stmt(Python3Parser.While_stmtContext ctx) {
+        GraphNode beginNode = new WhileBeginNode("WhileBegin");
+        GraphNode endNode = new WhileEndNode(getId() + "WhileEnd");
+        enterIterationStatement(beginNode, endNode);
+    }
+
+    @Override
+    public void exitWhile_stmt(Python3Parser.While_stmtContext ctx) {
+        exitIterationStatement();
+    }
+
+    @Override
+    public void enterFor_stmt(Python3Parser.For_stmtContext ctx) {
+        GraphNode beginNode = new ForBeginNode(getId() + "ForBegin");
+        GraphNode endNode = new ForEndNode(getId() + "ForEnd");
+        enterIterationStatement(beginNode, endNode);
+    }
+
+    @Override
+    public void exitFor_stmt(Python3Parser.For_stmtContext ctx) {
+        exitIterationStatement();
+    }
+
+    private void enterIterationStatement(GraphNode beginNode, GraphNode endNode) {
         ConditionNode condNode = new ConditionNode(getId() + "Condition");
         cycleBeginNodes.push(beginNode);
         conditions.push(condNode);
@@ -211,9 +196,7 @@ public class CCfgVisitor extends CBaseListener {
         cycleEndNodes.add(endNode);
     }
 
-    @Override
-    public void exitIterationStatement(CParser.IterationStatementContext ctx) {
-        if(!inMethod) return;
+    private void exitIterationStatement() {
         GraphNode beginNode = cycleBeginNodes.pop();
         GraphNode endNode = cycleEndNodes.pop();
 

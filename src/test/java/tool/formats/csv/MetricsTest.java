@@ -12,12 +12,12 @@ public class MetricsTest {
     @Test
     public void metricsTest() {
         AstGenerator astGenerator = new AstGenerator();
-        TreeNode ast = astGenerator.generatePythonAst("examples/python/python_example2.py");
+        TreeNode ast = astGenerator.generatePythonAst("examples\\python\\python_example2.py");
 
         CsvConverter csvConverter = new CsvConverter();
         String metrics = csvConverter.getMetricsInCsv(Collections.singletonList(ast));
 
-        FileManager.saveFile("output/csv.csv", metrics);
+        FileManager.saveFile("output\\csv.csv", metrics);
     }
 
 }

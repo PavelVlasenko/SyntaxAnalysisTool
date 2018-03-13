@@ -12,12 +12,12 @@ public class CAstGeneratorTest {
     @Test
     public void cAstGenerationTest() {
         AstGenerator astGenerator = new AstGenerator();
-        TreeNode ast = astGenerator.generateCAst("examples/c/c_example.c");
+        TreeNode ast = astGenerator.generateCAst("examples\\c\\c_example.c");
 
         FormatFactory formatFactory = new XMLFactory();
         String xmlAst = formatFactory.format(ast);
         System.out.println(xmlAst);
 
-        FileManager.saveFile("output/c_example.xml", xmlAst);
+        FileManager.saveFile("output\\c_example.xml", xmlAst);
     }
 }

@@ -12,12 +12,12 @@ public class PythonAstGeneratorTest {
     @Test
     public void pythonAstGenerationTest() {
         AstGenerator astGenerator = new AstGenerator();
-        TreeNode ast = astGenerator.generatePythonAst("examples/python/python_example2.py");
+        TreeNode ast = astGenerator.generatePythonAst("examples\\python\\python_example2.py");
 
         FormatFactory formatFactory = new XMLFactory();
         String xmlAst = formatFactory.format(ast);
         System.out.println(xmlAst);
 
-        FileManager.saveFile("output/python_example.xml", xmlAst);
+        FileManager.saveFile("output\\python_example.xml", xmlAst);
     }
 }
