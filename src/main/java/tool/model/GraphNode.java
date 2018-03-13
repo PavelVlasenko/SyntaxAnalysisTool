@@ -34,6 +34,9 @@ public class GraphNode extends MyNode {
     public void addSuccessor(GraphNode node) {
         if(noOtherSuccessor)
             return;
+        if(this.getSuccessors().contains(node)) {
+            return;
+        }
         node.predecessors.add(this);
         successors.add(node);
     }

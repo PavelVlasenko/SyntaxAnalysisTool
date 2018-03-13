@@ -55,7 +55,9 @@ public class PythonCfgMethodVisitor extends Python3BaseListener {
     }
 
     private void endNewCFG() {
-        cfgs.put(entryNode.getFilePath(), new ArrayList<>());
+        if(!cfgs.containsKey(entryNode.getFilePath())) {
+            cfgs.put(entryNode.getFilePath(), new ArrayList<>());
+        }
         entryNode.addNodeToLeaves(exitNode);
         cfgs.get(entryNode.getFilePath()).add(entryNode);
     }
