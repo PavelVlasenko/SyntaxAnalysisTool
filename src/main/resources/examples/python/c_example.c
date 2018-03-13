@@ -22,6 +22,10 @@ int main()
        statement(s);
     }
 
+    do {
+       statement(s);
+    } while( condition );
+
     /* Create window with name "Setup" and top-left corner at (0,0) */
 
     set_up_dialog("Setup", 0, 0);

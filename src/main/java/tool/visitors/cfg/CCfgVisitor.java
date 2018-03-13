@@ -184,6 +184,13 @@ public class CCfgVisitor extends CBaseListener {
             beginNode = new ForBeginNode(getId() + "SwitchBegin");
             endNode = new ForEndNode(getId() + "SwitchEnd");
         }
+        else if(text.startsWith("do")) {
+            beginNode = new DoWhileBeginNode(getId() + "DoWhileBegin");
+            endNode = new DoWhileEndNode(getId() + "DoWhileEnd");
+        }
+        else {
+            LOGGER.warn("Unknown iteration statement");
+        }
         ConditionNode condNode = new ConditionNode(getId() + "Condition");
         cycleBeginNodes.push(beginNode);
         conditions.push(condNode);
