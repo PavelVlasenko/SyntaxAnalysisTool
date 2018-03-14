@@ -1,12 +1,9 @@
 int main()
 {
-    int n = 0;
-    statement(s);
-    while(condition) {
-         statement(s);
-         if( a < 20 ) {
-              printf("a is less than 20\n" );
+    while(0) {
+         if(1) {
+             return -1;
          }
     }
-    statement(s);
+    return 0;
 }

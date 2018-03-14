@@ -31,6 +31,10 @@ public class GraphNode extends MyNode {
         return successors;
     }
 
+    public void resetSuccessors() {
+        successors = new ArrayList<>();
+    }
+
     public void addSuccessor(GraphNode node) {
         if(noOtherSuccessor)
             return;

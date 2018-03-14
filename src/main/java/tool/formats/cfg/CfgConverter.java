@@ -24,7 +24,7 @@ public class CfgConverter {
             Graph graph = builder.createGraph(entryNode);
             String entryNodeName = entryNode.getName();
             result.put(entryNode.getFilePath() + "_" +
-                    entryNodeName.substring(entryNodeName.indexOf("\n") + 1), graph);
+            entryNodeName.substring(entryNodeName.indexOf("\n") + 1), graph);
         }
         return result;
     }

@@ -185,7 +185,7 @@ public class CCfgVisitor extends CBaseListener {
         GraphNode endNode = null;
 
         if(text.startsWith("while")) {
-            beginNode = new WhileBeginNode("WhileBegin");
+            beginNode = new WhileBeginNode(getId() + "WhileBegin");
             endNode = new WhileEndNode(getId() + "WhileEnd");
         }
         else if(text.startsWith("for")) {
