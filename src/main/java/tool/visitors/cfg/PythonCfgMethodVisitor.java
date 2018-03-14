@@ -11,6 +11,7 @@ import tool.model.cfg.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 
 public class PythonCfgMethodVisitor extends Python3BaseListener {
 
@@ -26,9 +27,10 @@ public class PythonCfgMethodVisitor extends Python3BaseListener {
     private LinkedList<GraphNode> cycleBeginNodes = new LinkedList<>();
     private LinkedList<GraphNode> cycleEndNodes  = new LinkedList<>();
 
-    private ArrayList<ParseTree> elseStatements = new ArrayList<>();
+    private ArrayList<List<ParseTree>> elseStatements = new ArrayList<>();
     private GraphNode currentNode;
     private String fileName;
+    private boolean ifWithElse = false;
 
     private int identifierGen = 0;
 
@@ -95,12 +97,19 @@ public class PythonCfgMethodVisitor extends Python3BaseListener {
             String nodeName = ctx.getChild(i).getText();
             if("else".equals(nodeName) ||
                     "else if".equals(nodeName)) {
-                if(childCount > (i + 1)) {
-                    elseStatements.add(ctx.getChild(i + 1));
+                if("else".equals(nodeName)) {
+                    ifWithElse = true;
+                }
+                if(childCount > (i + 2)) {
+                    ParseTree tree = ctx.getChild(i + 2);
+                    ArrayList<ParseTree> childs = new ArrayList<>();
+                    for(int j = 0; j < tree.getChildCount(); j++) {
+                        childs.add(tree.getChild(j));
+                    }
+                    elseStatements.add(childs);
                 }
             }
         }
-
     }
 
     @Override
@@ -113,8 +122,11 @@ public class PythonCfgMethodVisitor extends Python3BaseListener {
         else {
             condNode.addNodeToLeaves(ifEndNode);
         }
-        condNode.addSuccessor(ifEndNode);
+        if(!ifWithElse) {
+            condNode.addSuccessor(ifEndNode);
+        }
         currentNode = ifEndNode;
+        ifWithElse = false;
     }
 
     @Override
@@ -133,11 +145,20 @@ public class PythonCfgMethodVisitor extends Python3BaseListener {
 
     @Override
     public void enterStmt(Python3Parser.StmtContext ctx) {
-        if(elseStatements.contains(ctx)) {
-            GraphNode condNode = conditions.getFirst();
-            currentNode = condNode;
+        Integer item = null;
+        for(int i =0; i < elseStatements.size(); i++) {
+            if(elseStatements.get(i).contains(ctx)) {
+                GraphNode condNode = conditions.getFirst();
+                currentNode = condNode;
+                item = i;
+                break;
+            }
+        }
+        if(item != null) {
+            elseStatements.remove(item.intValue());
         }
     }
+
 
     @Override
     public void enterBreak_stmt(Python3Parser.Break_stmtContext ctx) {
