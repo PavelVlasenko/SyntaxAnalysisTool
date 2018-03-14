@@ -1,6 +1,7 @@
 package tool.formats.dom;
 
 import guru.nidi.graphviz.model.Graph;
+import org.apache.commons.lang.SerializationUtils;
 import tool.model.GraphNode;
 import tool.model.cfg.EntryNode;
 import tool.model.cfg.ExitNode;
@@ -20,13 +21,12 @@ public class DomGenerator {
     private List<GraphNode> visited = new ArrayList<>();
 
     private List<GraphNode> visitedDom = new ArrayList<>();
-    private EntryNode entryNode;
+    private GraphNode entryNode;
+    private GraphNode exitNode;
     private Boolean [][] matrix;
     private int matrixSize = 0;
 
     private int index = 0;
-
-    private ExitNode exitNode;
 
     public DomGenerator(EntryNode entryNode) {
         this.entryNode = entryNode;
@@ -45,7 +45,61 @@ public class DomGenerator {
     }
 
     public void generatePostDom() {
+        setExitNode(entryNode);
+        revertCfg();
         generateDom();
+    }
+
+    private void setExitNode(GraphNode entryNode) {
+        if(visited.contains(entryNode)) {
+            return;
+        }
+        for(GraphNode node : entryNode.getSuccessors()) {
+            visited.add(node);
+            if(node instanceof ExitNode) {
+                exitNode = node;
+                visited = new ArrayList<>();
+                return;
+            }
+            else {
+                setExitNode(node);
+            }
+        }
+    }
+
+    private void revertCfg() {
+        GraphNode entryCopy = (GraphNode) SerializationUtils.clone(entryNode);
+        exitNode = entryCopy;
+        cleanSuccestors();
+        visited = new ArrayList<>();
+        revertSuccestors(entryCopy);
+    }
+
+    private void revertSuccestors(GraphNode node) {
+        if(visited.contains(node)) {
+            return;
+        }
+        visited.add(node);
+        for(GraphNode child : node.getSuccessors()) {
+            GraphNode from = getById(child.getId());
+            GraphNode to = getById(node.getId());
+            from.addSuccessor(to);
+            revertSuccestors(child);
+        }
+    }
+
+    private GraphNode getById(int id) {
+        for(GraphNode node : nodesByIndex.values()) {
+            if(node.getId() == id) {
+                return node;
+            }
+        }
+        return null;
+    }
+
+    private void cleanSuccestors() {
+        createNodes(exitNode);
+        clearGraph();
     }
 
     private void createMatrix() {
@@ -132,42 +186,9 @@ public class DomGenerator {
         }
     }
 
-
-    private void addNode(GraphNode node) {
-        nodesByIndex.put(getIndex(), node);
-        indexByNodes.put(node, getIndex());
-        processedNodes.add(node);
-        visited.add(node);
-    }
-
     private int getIndex() {
         index++;
         return (index -1);
-    }
-
-    private boolean notProcessedParents(GraphNode node) {
-        for(GraphNode parants : node.getPredecessors()) {
-            if(!processedNodes.contains(parants)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private void processWaitingNodes() {
-        Set<GraphNode> processed = new HashSet<>();
-        for(GraphNode node : waitingNodes) {
-            if(notProcessedParents(node)) {
-                continue;
-            }
-            else {
-                processed.add(node);
-                addNode(node);
-            }
-        }
-        for(GraphNode node : processed) {
-            waitingNodes.remove(node);
-        }
     }
 
     private void printMatrix() {
@@ -225,17 +246,4 @@ public class DomGenerator {
             node.resetSuccessors();
         }
     }
-
-//    public void exportGraph(String filePath, Format format) {
-//        CfgGraphBuilder builder = new CfgGraphBuilder();
-//        Graph graph = builder.createGraph(entryNode);
-//        String entryNodeName = entryNode.getName();
-//
-//        try {
-//            Graphviz.fromGraph(graph).width(900).render(format)
-//                    .toFile(new File(filePath  + "_" + FormatResolver.resolve(format)));
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
 }
