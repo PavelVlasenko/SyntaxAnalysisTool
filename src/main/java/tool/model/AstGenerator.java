@@ -19,7 +19,7 @@ public class AstGenerator {
     private static final Logger LOGGER = LoggerFactory.getLogger(AstGenerator.class);
 
     public TreeNode generatePythonAst(String fileName) {
-        LOGGER.info("Generate Python AST.");
+        System.out.println("Generate Python AST.");
         Python3Lexer lexer = new Python3Lexer(getStream(fileName));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         Python3Parser parser = new Python3Parser(tokens);
@@ -36,7 +36,7 @@ public class AstGenerator {
     }
 
     public TreeNode generateCAst(String fileName) {
-        LOGGER.info("Generate C AST.");
+        System.out.println("Generate C AST.");
         CLexer lexer = new CLexer(getStream(fileName));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         CParser parser = new CParser(tokens);

@@ -14,8 +14,8 @@ import java.util.List;
 import static guru.nidi.graphviz.model.Factory.graph;
 import static guru.nidi.graphviz.model.Factory.node;
 
-public class CfgGraphBuilder {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CfgGraphBuilder.class);
+public class CfgToGraphConverter {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CfgToGraphConverter.class);
     private HashMap<Integer, Node> nodes = new HashMap<>();
     private List<Node> directedNodes = new ArrayList<>();
     private List<GraphNode> visited = new ArrayList<>();
@@ -33,10 +33,10 @@ public class CfgGraphBuilder {
 
     private void processGraph(GraphNode node) {
         if(visited.contains(node)) {
-            LOGGER.info("Skip node, cause it's already visited id={}, name={}", node.getId(), node.getName());
+            System.out.println("Skip node, cause it's already visited id=node.getId()");
             return;
         }
-        LOGGER.info("Process node id={}, name={}", node.getId(), node.getName());
+        System.out.println("Process node id= " + node.getId());
 
         List<Node> childNodes = new ArrayList<>();
         for(GraphNode childNode : node.getSuccessors()) {

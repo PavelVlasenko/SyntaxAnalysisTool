@@ -3,7 +3,7 @@ package tool.formats.dominator;
 import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.model.Graph;
 import org.junit.jupiter.api.Test;
-import tool.formats.cfg.CfgConverter;
+import tool.formats.cfg.GraphBuilder;
 import tool.formats.dom.DomGenerator;
 import tool.model.CfgGenerator;
 import tool.model.cfg.EntryNode;
@@ -23,7 +23,7 @@ public class DomGeneratorTest {
 
         DomGenerator domGenerator = new DomGenerator(cfgs.values().iterator().next().get(0));
         domGenerator.generateDom();
-        CfgConverter graphBuilder = new CfgConverter();
+        GraphBuilder graphBuilder = new GraphBuilder();
         List<EntryNode> cfgList = new ArrayList<>();
         for(ArrayList<EntryNode> list : cfgs.values()) {
             cfgList.addAll(list);
@@ -41,7 +41,7 @@ public class DomGeneratorTest {
 
         DomGenerator domGenerator = new DomGenerator(cfgs.values().iterator().next().get(0));
         domGenerator.generatePostDom();
-        CfgConverter graphBuilder = new CfgConverter();
+        GraphBuilder graphBuilder = new GraphBuilder();
         List<EntryNode> cfgList = new ArrayList<>();
         for(ArrayList<EntryNode> list : cfgs.values()) {
             cfgList.addAll(list);

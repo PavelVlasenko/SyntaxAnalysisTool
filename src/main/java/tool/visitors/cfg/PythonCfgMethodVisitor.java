@@ -72,13 +72,13 @@ public class PythonCfgMethodVisitor extends Python3BaseListener {
     public void enterFuncdef(Python3Parser.FuncdefContext ctx) {
         String text = ctx.getText();
         String methodName = text.substring(0, text.indexOf("("));
-        LOGGER.info("Enter func def {}", methodName);
+        System.out.println("Enter func def " +  methodName);
         initNewCFG(methodName);
     }
 
     @Override
     public void exitFuncdef(Python3Parser.FuncdefContext ctx) {
-        LOGGER.info("Exit func def");
+        System.out.println("Exit func def");
         endNewCFG();
     }
 

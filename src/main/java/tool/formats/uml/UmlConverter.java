@@ -34,10 +34,10 @@ public class UmlConverter {
      * @return Graph for UML diagram
      */
     public Graph createUml(List<TreeNode> ast) {
-        LOGGER.info("Start create uml");
+        System.out.println("Start create uml");
         List<Node> classNodes = new ArrayList<>();
         for(TreeNode rootNode : ast) {
-            LOGGER.info("Create UML for the root node {}", rootNode.getFilePath());
+            System.out.println("Create UML for the root node " + rootNode.getFilePath());
             for(TreeNode node : rootNode.getChildren()) {
                 if (node.getNodeType().equals("class")) {
                     ClassNode classNode = (ClassNode) node;

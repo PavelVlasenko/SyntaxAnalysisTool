@@ -25,7 +25,7 @@ public class CfgGenerator {
     public static final Logger LOGGER = LoggerFactory.getLogger(CfgGenerator.class);
 
     public HashMap<String, ArrayList<EntryNode>> generatePythonCfg(String fileName) {
-        LOGGER.info("Generate Python CFG.");
+        System.out.println("Generate Python CFG.");
         Python3Lexer lexer = new Python3Lexer(getStream(fileName));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         Python3Parser parser = new Python3Parser(tokens);
@@ -41,7 +41,7 @@ public class CfgGenerator {
     }
 
     public HashMap<String, ArrayList<EntryNode>> generateCCfg(String fileName) {
-        LOGGER.info("Generate C CFG.");
+        System.out.println("Generate C CFG.");
         CLexer lexer = new CLexer(getStream(fileName));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         CParser parser = new CParser(tokens);

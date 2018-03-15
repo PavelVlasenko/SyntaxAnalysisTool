@@ -68,13 +68,13 @@ public class CCfgVisitor extends CBaseListener {
         inMethod = true;
         String text = ctx.getText();
         String methodName = text.substring(0, text.indexOf("("));
-        LOGGER.info("Enter func def {}", methodName);
+        System.out.println("Enter func def " + methodName);
         initNewCFG(methodName);
     }
 
     @Override
     public void exitFunctionDefinition(CParser.FunctionDefinitionContext ctx) {
-        LOGGER.info("Exit func def");
+        System.out.println("Exit func def");
         endNewCFG();
         inMethod = false;
     }

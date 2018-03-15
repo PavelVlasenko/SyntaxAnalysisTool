@@ -12,15 +12,15 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-public class CfgConverter {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CfgConverter.class);
+public class GraphBuilder {
+    private static final Logger LOGGER = LoggerFactory.getLogger(GraphBuilder.class);
 
     public Map<String, Graph> createGraph(List<EntryNode> cfgs) {
-        LOGGER.info("Start convert cfg");
+        System.out.println("Start convert cfg");
         Map<String, Graph> result = new HashMap<>();
         for(EntryNode entryNode : cfgs) {
-            LOGGER.info("Process  cfgNode {}", entryNode.getName());
-            CfgGraphBuilder builder = new CfgGraphBuilder();
+            System.out.println("Process  cfgNode" + entryNode.getName());
+            CfgToGraphConverter builder = new CfgToGraphConverter();
             Graph graph = builder.createGraph(entryNode);
             String entryNodeName = entryNode.getName();
             result.put(entryNode.getFilePath() + "_" +
@@ -36,7 +36,7 @@ public class CfgConverter {
     }
 
     public void exportGraph(Graph graph, String filePath, Format format) {
-        LOGGER.info("Save CFG graph to {}", filePath);
+        System.out.println("Save CFG graph to " + filePath);
         try {
             Graphviz.fromGraph(graph).width(900).render(format)
                     .toFile(new File(filePath  + "_" + FormatResolver.resolve(format)));
