@@ -4,5 +4,5 @@ public class Settings {
 
     public static String inputFilePath;
     public static String outputDir;
-
+    public static Type type;
 }

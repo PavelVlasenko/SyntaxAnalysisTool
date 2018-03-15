@@ -5,6 +5,7 @@ import guru.nidi.graphviz.engine.Graphviz;
 import guru.nidi.graphviz.model.Graph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tool.model.GraphNode;
 import tool.model.cfg.EntryNode;
 import tool.utils.FormatResolver;
 

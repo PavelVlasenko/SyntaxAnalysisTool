@@ -1,34 +1,44 @@
 package tool;
 
-import guru.nidi.graphviz.engine.Format;
-import guru.nidi.graphviz.model.Graph;
 import tool.console.Settings;
-import tool.formats.cfg.GraphBuilder;
-import tool.model.CfgGenerator;
-import tool.model.cfg.EntryNode;
+import tool.console.Type;
+import tool.formats.csv.CsvConverter;
+import tool.formats.xml.FormatFactory;
+import tool.formats.xml.XMLFactory;
+import tool.model.AstGenerator;
+import tool.model.TreeNode;
+import tool.utils.FileManager;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.File;
+
 
 public class AstRunner extends Runner {
 
     public static void main(String ... args) {
         enterSettings();
         System.out.println("Start AST generator.");
-        CfgGenerator cfgGenerator = new CfgGenerator();
-        HashMap<String, ArrayList<EntryNode>> cfgs = cfgGenerator.generateCCfg(Settings.inputFilePath);
-
-        GraphBuilder graphBuilder = new GraphBuilder();
-        List<EntryNode> cfgList = new ArrayList<>();
-        for(ArrayList<EntryNode> list : cfgs.values()) {
-            cfgList.addAll(list);
+        AstGenerator astGenerator = new AstGenerator();
+        TreeNode ast;
+        if(Settings.type == Type.PYTHON) {
+            ast = astGenerator.generatePythonAst(Settings.inputFilePath);
         }
+        else {
+            ast = astGenerator.generateCAst(Settings.inputFilePath);
+        }
+        System.out.println("AST tree is generated.");
 
-        Map<String, Graph> graphs = graphBuilder.createGraph(cfgList);
-        graphBuilder.exportGraphs(graphs, "C:\\Users\\SBT-Vlasenko-PV\\Test\\", Format.PNG);
+        FormatFactory formatFactory = new XMLFactory();
+        String xmlAst = formatFactory.format(ast);
+        System.out.println(xmlAst);
 
+        System.out.println("Save AST in XML format.");
+        FileManager.saveFile(Settings.outputDir + File.separator  + "ast.xml", xmlAst);
+
+        System.out.println("Generate csv metrics");
+        CsvConverter csvConverter = new CsvConverter();
+        String metrics = csvConverter.getMetricsInCsv(ast.getChildren());
+        FileManager.saveFile(Settings.outputDir + File.separator + "metrics.csv", metrics);
+        System.out.println("Finish program");
     }
 
 }

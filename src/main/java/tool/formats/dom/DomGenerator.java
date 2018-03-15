@@ -1,6 +1,5 @@
 package tool.formats.dom;
 
-import guru.nidi.graphviz.model.Graph;
 import org.apache.commons.lang.SerializationUtils;
 import tool.model.GraphNode;
 import tool.model.cfg.EntryNode;
@@ -10,29 +9,24 @@ import java.util.*;
 
 public class DomGenerator {
 
-    List<LinkedList<GraphNode>> ways = new ArrayList<>();
+    private List<LinkedList<GraphNode>> ways = new ArrayList<>();
 
     private LinkedHashMap<Integer, GraphNode> nodesByIndex = new LinkedHashMap<>();
     private LinkedHashMap<GraphNode, Integer> indexByNodes = new LinkedHashMap<>();
-    private Set<GraphNode> processedNodes = new HashSet<>();
-
-    private Set<GraphNode> waitingNodes = new HashSet<>();
 
     private List<GraphNode> visited = new ArrayList<>();
 
-    private List<GraphNode> visitedDom = new ArrayList<>();
-    private GraphNode entryNode;
+    private EntryNode entryNode;
     private GraphNode exitNode;
     private Boolean [][] matrix;
     private int matrixSize = 0;
-
     private int index = 0;
 
     public DomGenerator(EntryNode entryNode) {
         this.entryNode = entryNode;
     }
 
-    public void generateDom() {
+    public EntryNode generateDom() {
         getWays(entryNode, new LinkedList<>(), new HashSet<>());
         createNodes(entryNode);
         createMatrix();
@@ -42,6 +36,7 @@ public class DomGenerator {
         System.out.println("_______________________________");
         printMatrix();
         exportGraph();
+        return entryNode;
     }
 
     public void generatePostDom() {

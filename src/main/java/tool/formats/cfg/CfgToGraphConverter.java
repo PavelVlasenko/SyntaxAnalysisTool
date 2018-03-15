@@ -2,8 +2,6 @@ package tool.formats.cfg;
 
 import guru.nidi.graphviz.model.Graph;
 import guru.nidi.graphviz.model.Node;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import tool.model.GraphNode;
 import tool.model.cfg.EntryNode;
 
@@ -15,7 +13,6 @@ import static guru.nidi.graphviz.model.Factory.graph;
 import static guru.nidi.graphviz.model.Factory.node;
 
 public class CfgToGraphConverter {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CfgToGraphConverter.class);
     private HashMap<Integer, Node> nodes = new HashMap<>();
     private List<Node> directedNodes = new ArrayList<>();
     private List<GraphNode> visited = new ArrayList<>();
