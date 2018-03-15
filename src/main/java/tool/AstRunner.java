@@ -11,7 +11,6 @@ import tool.utils.FileManager;
 
 import java.io.File;
 
-
 public class AstRunner extends Runner {
 
     public static void main(String ... args) {

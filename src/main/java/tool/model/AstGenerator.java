@@ -8,9 +8,11 @@ import org.slf4j.LoggerFactory;
 import tool.antlr4.*;
 import tool.model.ast.ClassNode;
 import tool.model.ast.RootNode;
+import tool.utils.CharStreamUtils;
 import tool.visitors.ast.CAstVisitor;
 import tool.visitors.ast.PythonAstVisitor;
 
+import java.io.FileInputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -20,7 +22,7 @@ public class AstGenerator {
 
     public TreeNode generatePythonAst(String fileName) {
         System.out.println("Generate Python AST.");
-        Python3Lexer lexer = new Python3Lexer(getStream(fileName));
+        Python3Lexer lexer = new Python3Lexer(CharStreamUtils.getStream(fileName));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         Python3Parser parser = new Python3Parser(tokens);
 
@@ -37,7 +39,7 @@ public class AstGenerator {
 
     public TreeNode generateCAst(String fileName) {
         System.out.println("Generate C AST.");
-        CLexer lexer = new CLexer(getStream(fileName));
+        CLexer lexer = new CLexer(CharStreamUtils.getStream(fileName));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         CParser parser = new CParser(tokens);
 
@@ -54,17 +56,5 @@ public class AstGenerator {
         parseTreeWalker.walk(visitor, tree);
 
         return ast;
-    }
-
-    private CharStream getStream(String fileName) {
-        CharStream input = null;
-        try {
-            ClassLoader classLoader = getClass().getClassLoader();
-            Path path = Paths.get(classLoader.getResource(fileName).toURI());
-            input = CharStreams.fromPath(path);
-        } catch (Exception e) {
-            LOGGER.error("Error while parsing file.");
-        }
-        return input;
     }
 }

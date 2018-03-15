@@ -24,7 +24,16 @@ public class GraphBuilder {
             CfgToGraphConverter builder = new CfgToGraphConverter();
             Graph graph = builder.createGraph(entryNode);
             String entryNodeName = entryNode.getName();
-            result.put(entryNode.getFilePath() + "_" +
+
+            String filePath = entryNode.getFilePath();
+            String cleanFileName;
+            if(filePath.contains(File.separator)) {
+               cleanFileName = filePath.substring(filePath.lastIndexOf(File.separator) + 1);
+            }
+            else {
+                cleanFileName = filePath;
+            }
+            result.put(cleanFileName + "_" +
             entryNodeName.substring(entryNodeName.indexOf("\n") + 1), graph);
         }
         return result;
@@ -32,7 +41,7 @@ public class GraphBuilder {
 
     public void exportGraphs( Map<String, Graph> graphs, String pathPrefix, Format format) {
         for(Map.Entry<String, Graph> graphEntry : graphs.entrySet()) {
-            exportGraph(graphEntry.getValue(), pathPrefix + graphEntry.getKey(), format);
+            exportGraph(graphEntry.getValue(), pathPrefix + File.separator + graphEntry.getKey(), format);
         }
     }
 

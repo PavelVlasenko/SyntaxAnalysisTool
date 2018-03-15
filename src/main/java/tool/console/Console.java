@@ -9,7 +9,7 @@ public class Console {
 
         System.out.println("\n Enter input file path:");
 
-        String inputFilePath  = scanner.nextLine();
+        String inputFilePath  = scanner.next();
         Settings.inputFilePath = inputFilePath;
 
         System.out.println("\n Select type(enter 0 or 1):");
@@ -27,7 +27,7 @@ public class Console {
 
         System.out.println("\n Enter output dir path:");
 
-        String outputDirPath  = scanner.nextLine();
-        Settings.inputFilePath = outputDirPath;
+        String outputDirPath  = scanner.next();
+        Settings.outputDir = outputDirPath;
     }
 }

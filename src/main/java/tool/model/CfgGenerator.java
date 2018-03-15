@@ -12,6 +12,7 @@ import tool.antlr4.CParser;
 import tool.antlr4.Python3Lexer;
 import tool.antlr4.Python3Parser;
 import tool.model.cfg.EntryNode;
+import tool.utils.CharStreamUtils;
 import tool.visitors.cfg.CCfgVisitor;
 import tool.visitors.cfg.PythonCfgVisitor;
 
@@ -26,7 +27,7 @@ public class CfgGenerator {
 
     public HashMap<String, ArrayList<EntryNode>> generatePythonCfg(String fileName) {
         System.out.println("Generate Python CFG.");
-        Python3Lexer lexer = new Python3Lexer(getStream(fileName));
+        Python3Lexer lexer = new Python3Lexer(CharStreamUtils.getStream(fileName));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         Python3Parser parser = new Python3Parser(tokens);
 
@@ -42,7 +43,7 @@ public class CfgGenerator {
 
     public HashMap<String, ArrayList<EntryNode>> generateCCfg(String fileName) {
         System.out.println("Generate C CFG.");
-        CLexer lexer = new CLexer(getStream(fileName));
+        CLexer lexer = new CLexer(CharStreamUtils.getStream(fileName));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         CParser parser = new CParser(tokens);
 
@@ -55,17 +56,4 @@ public class CfgGenerator {
 
         return visitor.getCFGs();
     }
-
-    private CharStream getStream(String fileName) {
-        CharStream input = null;
-        try {
-            ClassLoader classLoader = getClass().getClassLoader();
-            Path path = Paths.get(classLoader.getResource(fileName).toURI());
-            input = CharStreams.fromPath(path);
-        } catch (Exception e) {
-            LOGGER.error("Error while parsing file.");
-        }
-        return input;
-    }
-
 }
