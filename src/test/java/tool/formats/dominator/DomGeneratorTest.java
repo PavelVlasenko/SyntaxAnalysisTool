@@ -2,6 +2,7 @@ package tool.formats.dominator;
 
 import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.model.Graph;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import tool.formats.cfg.GraphBuilder;
 import tool.formats.dom.DomGenerator;
@@ -13,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Disabled
 public class DomGeneratorTest {
 
     @Test

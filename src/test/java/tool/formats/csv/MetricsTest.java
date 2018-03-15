@@ -1,5 +1,6 @@
 package tool.formats.csv;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import tool.model.AstGenerator;
 import tool.model.TreeNode;
@@ -7,6 +8,7 @@ import tool.utils.FileManager;
 
 import java.util.Collections;
 
+@Disabled
 public class MetricsTest {
 
     @Test
