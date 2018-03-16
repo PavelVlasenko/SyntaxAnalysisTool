@@ -471,6 +471,9 @@ class GalaxyToolRunResponse(GalaxyBaseRunResponse):
         output_id = runnable_output.get_id()
         return tool_response_to_output(self.api_run_response, self._history_id, output_id)
 
+    first_elem = 123
+    second_elem = 123
+
     def output_dataset_id(self, output):
         outputs = self.api_run_response["outputs"]
         output_id = output.get_id()

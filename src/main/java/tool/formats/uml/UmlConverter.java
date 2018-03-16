@@ -39,13 +39,20 @@ public class UmlConverter {
             String className = node.getName();
 
             StringBuilder methods = new StringBuilder();
+            StringBuilder fields = new StringBuilder();
             for (TreeNode classChild : node.getChildren()) {
                 if (classChild.getNodeType().equals("method")) {
                     methods.append(classChild.getName()).append("\n");
                 }
+                if (classChild.getNodeType().equals("field")) {
+                    fields.append(classChild.getName()).append("\n");
+                }
             }
             Node umlClassNode = node(node.getName())
-                    .with(Records.of(turn(rec(className), rec("method", methods.toString()))));
+                    .with(Records.of(turn(
+                            rec(className),
+                            rec("method", methods.toString()),
+                            rec("field", fields.toString()))));
             classNodes.add(umlClassNode);
             nodesByName.put(className, umlClassNode);
         }
