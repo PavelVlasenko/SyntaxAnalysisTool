@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 public class FileManager {
@@ -16,6 +17,23 @@ public class FileManager {
         }
 
         createFileList(args[1], args[0]);
+    }
+
+    public static List<String> getAllFilePaths(String dir) {
+        List<String> filePaths = new ArrayList<>();
+        File [] dirFile = {new File(dir)};
+        getAllFilePaths(dirFile, filePaths);
+        return filePaths;
+    }
+
+    private  static void getAllFilePaths(File[] files, List<String> filePaths) {
+        for(File file : files) {
+            if (!file.isDirectory()) {
+                filePaths.add(file.getAbsolutePath());
+            } else {
+                getAllFilePaths(file.listFiles(), filePaths);
+            }
+        }
     }
 
     public static String readLine(String filename, int lineNumber) {

@@ -1,5 +1,6 @@
 package tool.visitors.ast;
 
+import org.antlr.v4.runtime.tree.ParseTree;
 import tool.antlr4.Python3BaseListener;
 import tool.antlr4.Python3Parser;
 import tool.model.ast.ClassNode;
@@ -22,6 +23,11 @@ public class PythonAstVisitor extends Python3BaseListener {
     @Override
     public void enterClassdef(Python3Parser.ClassdefContext ctx) {
         ClassNode classNode = new ClassNode(ctx.NAME().getText());
+        ParseTree extendClass = ctx.getChild(Python3Parser.ArglistContext.class, 0);
+        if(extendClass != null) {
+            classNode.setExtension(extendClass.getText());
+        }
+
         classNode.setFilePath(currentNode.getFilePath());
         currentNode.addChild(classNode);
         currentNode = classNode;

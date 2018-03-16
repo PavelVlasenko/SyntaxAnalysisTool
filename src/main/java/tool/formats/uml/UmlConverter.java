@@ -5,28 +5,94 @@ import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.engine.Graphviz;
 import guru.nidi.graphviz.model.Graph;
 import guru.nidi.graphviz.model.Node;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import tool.model.ast.ClassNode;
 import tool.model.TreeNode;
+import tool.utils.FormatResolver;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static guru.nidi.graphviz.attribute.Records.rec;
 import static guru.nidi.graphviz.attribute.Records.turn;
 import static guru.nidi.graphviz.model.Factory.graph;
 import static guru.nidi.graphviz.model.Factory.node;
-import static guru.nidi.graphviz.model.Link.to;
 
 /**
  *  Generates UML
  */
 public class UmlConverter {
-    private static final Logger LOGGER = LoggerFactory.getLogger(UmlConverter.class);
-    private String filePath;
+
+    private List<ClassNode> classes = new ArrayList<>();
+    private Map<Node, Set<Node>> linkedNodes = new LinkedHashMap<>();
+
+    public UmlConverter() {
+    }
+
+    public Graph createUmlFromFilesList(List<TreeNode> source) {
+        filterClasses(source);
+
+        List<Node> classNodes = new ArrayList<>();
+        Map<String, Node> nodesByName = new HashMap<>();
+        for(ClassNode node : classes) {
+            System.out.println("Create UML for the node " + node.getFilePath());
+            String className = node.getName();
+
+            StringBuilder methods = new StringBuilder();
+            for (TreeNode classChild : node.getChildren()) {
+                if (classChild.getNodeType().equals("method")) {
+                    methods.append(classChild.getName()).append("\n");
+                }
+            }
+            Node umlClassNode = node(node.getName())
+                    .with(Records.of(turn(rec(className), rec("method", methods.toString()))));
+            classNodes.add(umlClassNode);
+            nodesByName.put(className, umlClassNode);
+        }
+
+        for(ClassNode classNode : classes) {
+            String extendedClass = classNode.getExtension();
+            if(extendedClass != null) {
+                Set<Node> childs = linkedNodes.get(nodesByName.get(extendedClass));
+                if(childs == null) {
+                    childs = new HashSet<>();
+                }
+                childs.add(nodesByName.get(classNode.getName()));
+                linkedNodes.put(nodesByName.get(extendedClass), childs);
+            }
+        }
+
+        List<Node> graphNodes = new ArrayList<>();
+        Set<Node> usedNodes = new HashSet<>();
+        for(Map.Entry<Node, Set<Node>> entry : linkedNodes.entrySet()) {
+            Node[] linkedNodes = new Node[entry.getValue().size()];
+            graphNodes.add(entry.getKey().link(entry.getValue().toArray(linkedNodes)));
+            usedNodes.add(entry.getKey());
+            usedNodes.addAll(entry.getValue());
+        }
+        for(Node singleNode : classNodes) {
+            if(!usedNodes.contains(singleNode)) {
+                graphNodes.add(singleNode);
+            }
+        }
+
+        Node [] nodesArray = new Node [graphNodes.size()];
+        Graph graph = graph("CfgGraph").directed().with(graphNodes.toArray(nodesArray));
+        return graph;
+    }
+
+    private void filterClasses(List<TreeNode> source) {
+        if(source.isEmpty()) return;
+        for(TreeNode node : source) {
+            if(node instanceof ClassNode) {
+                classes.add((ClassNode)node);
+            }
+            else {
+                filterClasses(node.getChildren());
+            }
+        }
+    }
+
 
     /**
      * Creates graph
@@ -66,17 +132,9 @@ public class UmlConverter {
     public void exportUml(Graph graph, String filePath, Format format) {
         try {
             Graphviz.fromGraph(graph).width(900).render(format)
-                    .toFile(new File(filePath));
+                    .toFile(new File(filePath  + "_" + FormatResolver.resolve(format)));
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public String getFilePath() {
-        return filePath;
-    }
-
-    public void setFilePath(String filePath) {
-        this.filePath = filePath;
     }
 }

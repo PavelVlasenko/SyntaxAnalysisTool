@@ -275,7 +275,7 @@ def stage_in(ctx, runnable, config, user_gi, history_id, job_path, **kwds):
     return galaxy_paths, job_dict, datasets
 
 
-class GalaxyBaseRunResponse(SuccessfulRunResponse):
+class GalaxyBaseRunResponse():
 
     def __init__(
             self,
