@@ -16,7 +16,7 @@ import java.util.List;
 public class UmlRunner extends Runner {
 
     public static void main(String ... args) {
-        enterSettings();
+        enterUmlSettings();
         System.out.println("Start AST generation.");
         AstGenerator astGenerator = new AstGenerator();
         List<TreeNode> asts = new ArrayList<>();

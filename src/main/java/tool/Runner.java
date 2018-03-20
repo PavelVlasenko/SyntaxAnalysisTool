@@ -11,4 +11,11 @@ public class Runner {
             console.enterSettings();
         }
     }
+
+    public static void enterUmlSettings() {
+        if(!Settings.test) {
+            Console console = new Console();
+            console.enterUmlSettings();
+        }
+    }
 }
