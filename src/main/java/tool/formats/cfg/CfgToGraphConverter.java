@@ -12,17 +12,30 @@ import java.util.List;
 import static guru.nidi.graphviz.model.Factory.graph;
 import static guru.nidi.graphviz.model.Factory.node;
 
+/**
+ * Converts CFG tree to GraphViz format
+ */
 public class CfgToGraphConverter {
+
+    //List of all nodes by ids
     private HashMap<Integer, Node> nodes = new HashMap<>();
+
+    //Linked nodes in GraphViz format
     private List<Node> directedNodes = new ArrayList<>();
+
+    //Visited nodes
     private List<GraphNode> visited = new ArrayList<>();
 
     public Graph createGraph(EntryNode entryNode) {
+        //Create list of all nodes
         createNodes(entryNode);
 
         visited = new ArrayList<>();
+
+        //Process nodes and create linked nodes
         processGraph(entryNode);
 
+        //Create graph
         Node[] directedArray = new Node[directedNodes.size()];
         Graph graph = graph("CfgGraph").directed().with(directedNodes.toArray(directedArray));
         return graph;
@@ -30,11 +43,13 @@ public class CfgToGraphConverter {
 
     private void processGraph(GraphNode node) {
         if(visited.contains(node)) {
+            //Skip node if we already visit it
             System.out.println("Skip node, cause it's already visited id=node.getId()");
             return;
         }
         System.out.println("Process node id= " + node.getId());
 
+        //Create list of child nodes
         List<Node> childNodes = new ArrayList<>();
         for(GraphNode childNode : node.getSuccessors()) {
             Node to = nodes.get(childNode.getId());

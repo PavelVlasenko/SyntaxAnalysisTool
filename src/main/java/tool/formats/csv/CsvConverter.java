@@ -6,7 +6,7 @@ import tool.model.TreeNode;
 import java.util.List;
 
 /**
- * Creates csv in CSV
+ * Creates CSV metrics from AST tree
  */
 public class CsvConverter {
 

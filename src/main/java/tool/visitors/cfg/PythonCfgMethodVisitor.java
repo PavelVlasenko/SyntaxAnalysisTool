@@ -1,8 +1,6 @@
 package tool.visitors.cfg;
 
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import tool.antlr4.Python3BaseListener;
 import tool.antlr4.Python3Parser;
 import tool.model.GraphNode;
@@ -13,20 +11,25 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * Python method visitor
+ */
 public class PythonCfgMethodVisitor extends Python3BaseListener {
-
     private HashMap<String, ArrayList<EntryNode>> cfgs;
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(PythonCfgVisitor.class);
 
     private EntryNode entryNode;
     private ExitNode exitNode;
 
+    //Contains if conditions nodes
     private LinkedList<GraphNode> conditions  = new LinkedList<>();
 
+    //Contains cycle begin conditions(For, While,  ...)
     private LinkedList<GraphNode> cycleBeginNodes = new LinkedList<>();
+
+    //Contains cycle end conditions(For, While,  ...)
     private LinkedList<GraphNode> cycleEndNodes  = new LinkedList<>();
 
+    //Else statements
     private ArrayList<List<ParseTree>> elseStatements = new ArrayList<>();
     private GraphNode currentNode;
     private String fileName;

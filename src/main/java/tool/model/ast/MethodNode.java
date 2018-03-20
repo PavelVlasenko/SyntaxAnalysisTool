@@ -1,5 +1,8 @@
 package tool.model.ast;
 
+/**
+ * Method node for AST model
+ */
 public class MethodNode extends ModifiersNode {
     protected String returnType;
     protected int nbIf;

@@ -4,6 +4,9 @@ import tool.model.cfg.ExitNode;
 
 import java.util.ArrayList;
 
+/**
+ * This is the base class for all CFG nodes
+ */
 public class GraphNode extends MyNode {
     protected ArrayList<GraphNode> predecessors;
     protected ArrayList<GraphNode> successors;

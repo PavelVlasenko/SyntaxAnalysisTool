@@ -19,7 +19,7 @@ import static guru.nidi.graphviz.model.Factory.graph;
 import static guru.nidi.graphviz.model.Factory.node;
 
 /**
- *  Generates UML
+ *  Generates UML from list of classes as AST trees.
  */
 public class UmlConverter {
 
@@ -29,11 +29,19 @@ public class UmlConverter {
     public UmlConverter() {
     }
 
+    /**
+     * Generates UML in GraphViz format
+     *
+     * @param source list of classes
+     * @return graph
+     */
     public Graph createUmlFromFilesList(List<TreeNode> source) {
         filterClasses(source);
 
         List<Node> classNodes = new ArrayList<>();
         Map<String, Node> nodesByName = new HashMap<>();
+
+        //For every class node create UML graph node
         for(ClassNode node : classes) {
             System.out.println("Create UML for the node " + node.getFilePath());
             String className = node.getName();
@@ -41,13 +49,18 @@ public class UmlConverter {
             StringBuilder methods = new StringBuilder();
             StringBuilder fields = new StringBuilder();
             for (TreeNode classChild : node.getChildren()) {
+                //Add method part
                 if (classChild.getNodeType().equals("method")) {
                     methods.append(classChild.getName()).append("\n");
                 }
+
+                //Add field part
                 if (classChild.getNodeType().equals("field")) {
                     fields.append(classChild.getName()).append("\n");
                 }
             }
+
+            //Craete node
             Node umlClassNode = node(node.getName())
                     .with(Records.of(turn(
                             rec(className),
@@ -57,6 +70,7 @@ public class UmlConverter {
             nodesByName.put(className, umlClassNode);
         }
 
+        //Then crete link between classes(For example one class extends another)
         for(ClassNode classNode : classes) {
             String extendedClass = classNode.getExtension();
             if(extendedClass != null) {
@@ -69,6 +83,7 @@ public class UmlConverter {
             }
         }
 
+        //Add all classes in one graph format
         List<Node> graphNodes = new ArrayList<>();
         Set<Node> usedNodes = new HashSet<>();
         for(Map.Entry<Node, Set<Node>> entry : linkedNodes.entrySet()) {
@@ -88,6 +103,9 @@ public class UmlConverter {
         return graph;
     }
 
+    /**
+     * Filter list of AST trees and returns only class nodes
+     */
     private void filterClasses(List<TreeNode> source) {
         if(source.isEmpty()) return;
         for(TreeNode node : source) {
@@ -136,6 +154,9 @@ public class UmlConverter {
         return graph;
     }
 
+    /**
+     * Export UML in files
+     */
     public void exportUml(Graph graph, String filePath, Format format) {
         try {
             Graphviz.fromGraph(graph).width(900).render(format)

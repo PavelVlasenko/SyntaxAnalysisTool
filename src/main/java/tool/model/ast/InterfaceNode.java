@@ -2,6 +2,9 @@ package tool.model.ast;
 
 import java.util.ArrayList;
 
+/**
+ * Interface node for AST model
+ */
 public class InterfaceNode extends ModifiersNode {
     protected ArrayList<String> interfacesList;
 

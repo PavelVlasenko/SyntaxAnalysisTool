@@ -1,7 +1,5 @@
 package tool.visitors.cfg;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import tool.antlr4.Python3BaseListener;
 import tool.antlr4.Python3Parser;
 import tool.model.cfg.*;
@@ -10,9 +8,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 
+/**
+ * Python CFG visitor, for every method creates CfgMethodVisitor,
+ * because python language can contains method in method definition.
+ */
 public class PythonCfgVisitor extends Python3BaseListener {
-    private static final Logger LOGGER = LoggerFactory.getLogger(PythonCfgVisitor.class);
-
     private HashMap<String, ArrayList<EntryNode>> cfgs = new HashMap<>();
     private LinkedList<PythonCfgMethodVisitor> visitors = new LinkedList<>();
     private PythonCfgMethodVisitor currentVisitor;

@@ -2,6 +2,9 @@ package tool.console;
 
 import java.util.Scanner;
 
+/**
+ * This class is needed for entering data from console.
+ */
 public class Console {
 
     public void enterSettings() {

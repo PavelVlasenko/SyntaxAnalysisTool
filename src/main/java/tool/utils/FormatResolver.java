@@ -2,6 +2,9 @@ package tool.utils;
 
 import guru.nidi.graphviz.engine.Format;
 
+/**
+ * Resolves file suffix that depends on format
+ */
 public class FormatResolver {
 
     public static String resolve(Format format) {

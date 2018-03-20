@@ -11,6 +11,9 @@ import tool.model.TreeNode;
 import tool.model.cfg.MethodCallNode;
 import tool.model.cfg.VarAssignNode;
 
+/**
+ * Visitor for python AST tree generator.
+ */
 public class PythonAstVisitor extends Python3BaseListener {
 
     private static final String CONSTRUCTOR_METHOD = "__init__";

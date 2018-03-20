@@ -13,12 +13,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Runner for generating DOM
+ */
 public class DomRunner extends Runner {
 
     public static void main(String ... args) {
         enterSettings();
         System.out.println("Start the program");
         System.out.println("Generate CFG");
+
+        //Generate CFG
         CfgGenerator cfgGenerator = new CfgGenerator();
         HashMap<String, ArrayList<EntryNode>> cfgsMap = cfgGenerator.generateCCfg(Settings.inputFilePath);
         System.out.println("CFG is generated");

@@ -2,6 +2,9 @@ package tool.model.ast;
 
 import tool.model.TreeNode;
 
+/**
+ * Parameter node for AST model
+ */
 public class ParameterNode extends TreeNode {
     protected String type;
 

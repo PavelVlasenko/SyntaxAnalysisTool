@@ -6,7 +6,9 @@ import tool.model.cfg.EntryNode;
 import tool.model.cfg.ExitNode;
 import java.util.*;
 
-
+/**
+ * Generates Dominator and Postdominator tree.
+ */
 public class DomGenerator {
 
     private List<LinkedList<GraphNode>> ways = new ArrayList<>();
@@ -27,14 +29,22 @@ public class DomGenerator {
     }
 
     public EntryNode generateDom() {
+        //Get all available ways from start to end node.
         getWays(entryNode, new LinkedList<>(), new HashSet<>());
         createNodes(entryNode);
+
+        //Create matrix of links
         createMatrix();
+
+        //Fill this matrix, put one if Node is dominator.
         fillMatrix(entryNode, new ArrayList<>());
+
+        //Print matrix in console
         printMatrix();
         clearMatrix();
         System.out.println("_______________________________");
-        printMatrix();
+
+        //Export dom tree in file
         exportGraph();
         return entryNode;
     }
@@ -62,6 +72,9 @@ public class DomGenerator {
         }
     }
 
+    /**
+     * Revert Cfg for further postdominator creation
+     */
     private void revertCfg() {
         GraphNode entryCopy = (GraphNode) SerializationUtils.clone(entryNode);
         exitNode = entryCopy;
@@ -70,6 +83,9 @@ public class DomGenerator {
         revertSuccestors(entryCopy);
     }
 
+    /**
+     * Revert successors
+     */
     private void revertSuccestors(GraphNode node) {
         if(visited.contains(node)) {
             return;
@@ -125,6 +141,9 @@ public class DomGenerator {
         }
     }
 
+    /**
+     * Return true if from node is immediate dominator of node to
+     */
     private boolean isImmediateDom(GraphNode from, GraphNode to) {
         for(LinkedList<GraphNode> way : ways) {
             boolean containsTo = false;

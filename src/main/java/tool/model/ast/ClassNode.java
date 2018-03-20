@@ -1,5 +1,8 @@
 package tool.model.ast;
 
+/**
+ * Class node for AST model
+ */
 public class ClassNode extends InterfaceNode {
 
     protected String extension = null;

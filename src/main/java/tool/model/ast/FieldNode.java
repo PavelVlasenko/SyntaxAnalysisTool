@@ -1,5 +1,8 @@
 package tool.model.ast;
 
+/**
+ * Field node for AST model
+ */
 public class FieldNode extends ClassNode {
     protected String type;
 

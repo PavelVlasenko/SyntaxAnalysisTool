@@ -9,6 +9,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * File util class.
+ */
 public class FileManager {
     public static void main(String[] args) {
         if(args.length == 0) {

@@ -2,6 +2,9 @@ package tool.model;
 
 import java.util.ArrayList;
 
+/**
+ * Base class for all nodes
+ */
 public class TreeNode extends MyNode {
     protected TreeNode parent;
     protected ArrayList<TreeNode> children;

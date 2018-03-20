@@ -2,6 +2,9 @@ package tool.model;
 
 import java.io.Serializable;
 
+/**
+ * Base abstract class for all nodes
+ */
 public abstract class MyNode  implements Serializable {
     protected int id;
     protected String name;

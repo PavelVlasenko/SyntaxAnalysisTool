@@ -2,6 +2,9 @@ package tool.model.ast;
 
 import tool.model.TreeNode;
 
+/**
+ * Modifier node for AST model
+ */
 public abstract class ModifiersNode extends TreeNode {
     protected boolean isStatic = false;
     protected String visibility = "package-private";

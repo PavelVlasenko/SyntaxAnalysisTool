@@ -6,6 +6,9 @@ import tool.antlr4.CParser;
 import tool.model.ast.MethodNode;
 import tool.model.TreeNode;
 
+/**
+ * Visitor that generates Abstract AST.
+ */
 public class CAstVisitor extends CBaseListener {
 
     private TreeNode ast;

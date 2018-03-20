@@ -3,9 +3,6 @@ package tool.formats.cfg;
 import guru.nidi.graphviz.engine.Format;
 import guru.nidi.graphviz.engine.Graphviz;
 import guru.nidi.graphviz.model.Graph;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import tool.model.GraphNode;
 import tool.model.cfg.EntryNode;
 import tool.utils.FormatResolver;
 
@@ -13,18 +10,25 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
+/**
+ * Creates CFG graphs in GraphViz format from CFG tree.
+ */
 public class GraphBuilder {
-    private static final Logger LOGGER = LoggerFactory.getLogger(GraphBuilder.class);
 
     public Map<String, Graph> createGraph(List<EntryNode> cfgs) {
         System.out.println("Start convert cfg");
         Map<String, Graph> result = new HashMap<>();
+
+        //For every CFG tree we process it and add to the result map
         for(EntryNode entryNode : cfgs) {
             System.out.println("Process  cfgNode" + entryNode.getName());
+
+            //Create builder for every CFG tree, and build graph
             CfgToGraphConverter builder = new CfgToGraphConverter();
             Graph graph = builder.createGraph(entryNode);
             String entryNodeName = entryNode.getName();
 
+            //Read method name
             String filePath = entryNode.getFilePath();
             String cleanFileName;
             if(filePath.contains(File.separator)) {
@@ -39,6 +43,12 @@ public class GraphBuilder {
         return result;
     }
 
+    /**
+     * Export graphs to the files.
+     * @param graphs list of graphs.
+     * @param pathPrefix prefix fo files(output directory).
+     * @param format file format(Can be any GraphViz format such as  PNG, DOT, etc)
+     */
     public void exportGraphs( Map<String, Graph> graphs, String pathPrefix, Format format) {
         for(Map.Entry<String, Graph> graphEntry : graphs.entrySet()) {
             exportGraph(graphEntry.getValue(), pathPrefix + File.separator + graphEntry.getKey(), format);

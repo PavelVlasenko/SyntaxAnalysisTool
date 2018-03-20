@@ -12,17 +12,25 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 
+/**
+ * This visitor creates CFG graphs for methods.
+ */
 public class CCfgVisitor extends CBaseListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(CCfgVisitor.class);
     private HashMap<String, ArrayList<EntryNode>> cfgs = new HashMap<>();
     private EntryNode entryNode;
     private ExitNode exitNode;
 
+    //Contains if conditions nodes
     private LinkedList<GraphNode> conditions  = new LinkedList<>();
 
+    //Contains cycle begin conditions(For, While,  ...)
     private LinkedList<GraphNode> cycleBeginNodes = new LinkedList<>();
+
+    //Contains cycle end conditions(For, While,  ...)
     private LinkedList<GraphNode> cycleEndNodes  = new LinkedList<>();
 
+    //Else statements
     private ArrayList<ParseTree> elseStatements = new ArrayList<>();
     private GraphNode currentNode;
 

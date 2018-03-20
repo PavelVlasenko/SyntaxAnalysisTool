@@ -11,6 +11,9 @@ import tool.utils.FileManager;
 
 import java.io.File;
 
+/**
+ * Runner for generating AST
+ */
 public class AstRunner extends Runner {
 
     public static void main(String ... args) {

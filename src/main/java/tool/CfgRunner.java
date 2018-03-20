@@ -12,6 +12,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Runner for generating CFG
+ */
 public class CfgRunner extends Runner{
 
     public static void main(String ... args) {
